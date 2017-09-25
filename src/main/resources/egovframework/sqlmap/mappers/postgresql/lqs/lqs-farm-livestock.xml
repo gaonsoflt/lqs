@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="egovframework.lqs.service.impl.LivestockMapper">
+	<select id="retrieveLivestocks" parameterType="map" resultType="map">
+		SELECT
+			FARM_SEQ,
+			LS_TYPE,
+			(SELECT DISTINCT(CD_NM) FROM SYS_CODE_MASTER WHERE CD_ID = LS_TYPE) AS LS_NAME,
+			LS_COUNT
+		FROM LQS_FARM_LIVESTOCK 
+		WHERE FARM_SEQ = CAST(#{farm_seq} AS INTEGER)
+	</select>
+	
+	<insert id="createLivestock">
+		INSERT INTO LQS_FARM_LIVESTOCK (
+			FARM_SEQ,
+			LS_TYPE,
+			LS_COUNT
+		) VALUES (
+			CAST(#{farm_seq} AS INTEGER),
+			#{ls_type},
+			CAST(#{ls_count} AS INTEGER)
+		)
+	</insert>
+	
+	<update id="updateLivestock">
+		UPDATE LQS_FARM_LIVESTOCK
+		SET
+			LS_COUNT = CAST(#{ls_count} AS INTEGER)
+		WHERE FARM_SEQ = CAST(#{farm_seq} AS INTEGER)
+		AND LS_TYPE = #{ls_type}
+	</update>
+	
+	<delete id="deleteLivestock">
+		DELETE FROM LQS_FARM_LIVESTOCK
+		WHERE FARM_SEQ = CAST(#{farm_seq} AS INTEGER)
+	</delete>
+</mapper>

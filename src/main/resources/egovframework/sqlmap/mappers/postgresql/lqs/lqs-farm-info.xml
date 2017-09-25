@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="egovframework.lqs.service.impl.FarmMapper">
+	<select id="retrieveFarms" parameterType="map" resultType="map">
+		SELECT *
+		FROM (
+			SELECT (ROW_NUMBER() OVER()) AS RNUM, A.*
+			FROM (
+				SELECT
+					A.FARM_SEQ,
+					A.BIZ_TYPE,
+					(SELECT CD_NM FROM SYS_CODE_MASTER WHERE CD_ID = A.BIZ_TYPE) AS BIZ_TYPE_NAME,
+					A.REG_NUMBER,
+					'' AS PASSWORD,
+					A.FARM_NAME,
+					A.OWNER,
+					A.PHONE,
+					A.DESCRIPTION,
+					A.CRE_DT,
+					CASE WHEN A.RUN_YN = 1 THEN true ELSE false END AS RUN_YN,
+					B.ADDRESS_SEQ,
+					B.ZONECODE,
+					B.JIBUN_ADDRESS,
+					B.ROAD_ADDRESS,
+					B.DETAIL_ADDRESS,
+					B.SIDO,
+					B.SIGUNGU,
+					B.SIGUNGU_CODE,
+					B.ROADNAME_CODE,
+					B.ROADNAME,
+					B.BUILDING_CODE,
+					B.BUILDING_NAME,
+					B.BCODE,
+					B.BNAME,
+					B.BNAME1
+				FROM LQS_FARM_INFO A 
+				LEFT JOIN 
+				SYS_ADDRESS B ON A.ADDRESS_SEQ = B.ADDRESS_SEQ 
+				ORDER BY A.FARM_SEQ
+			) A
+			<where>
+				<if test="farm_seq != null">
+					AND A.FARM_SEQ = CAST(#{farm_seq} AS INTEGER)
+				</if>
+			</where>
+		) A
+		<where>
+			<if test='PAGE != null'>
+			<![CDATA[
+		       AND A.RNUM > (#{PAGE} - 1) * #{PAGESIZE}
+		       AND A.RNUM <= #{PAGE} * #{PAGESIZE}
+	    	]]>
+			</if>
+		</where>
+	</select>
+	
+	<select id="retrieveFarmsCount" parameterType="map" resultType="integer">
+		SELECT
+			COUNT(*)
+		FROM LQS_FARM_INFO 
+		<where>
+			<if test="farm_seq != null">
+				AND FARM_SEQ = CAST(#{farm_seq} AS INTEGER)
+			</if>
+		</where>
+	</select>
+	
+	<select id="retrieveMaxSeq" resultType="long">
+		SELECT 
+			CASE WHEN MAX(FARM_SEQ) IS NULL THEN 0 ELSE MAX(FARM_SEQ) END
+		FROM LQS_FARM_INFO 
+	</select>
+	
+	<insert id="createFarm">
+		INSERT INTO LQS_FARM_INFO (
+			FARM_SEQ,
+			BIZ_TYPE,
+			REG_NUMBER,
+			PASSWORD,
+			FARM_NAME,
+			OWNER,
+			PHONE,
+			DESCRIPTION,
+			RUN_YN,
+			ADDRESS_SEQ,
+			CRE_DT
+		) VALUES (
+			CAST(#{farm_seq} AS INTEGER),
+			#{biz_type},
+			#{reg_number},
+			#{password},
+			#{farm_name},
+			#{owner},
+			#{phone},
+			#{description},
+			CASE WHEN #{run_yn} = true THEN 1 ELSE 0 END,
+			CAST(#{address_seq} AS INTEGER),		
+			now()
+		)
+	</insert>
+	
+	<update id="updateFarm">
+		UPDATE LQS_FARM_INFO
+		SET
+			BIZ_TYPE = #{biz_type},
+			REG_NUMBER = #{reg_number},
+			FARM_NAME = #{farm_name},
+			OWNER = #{owner},
+			PHONE = #{phone},
+			RUN_YN = CASE WHEN #{run_yn} = true THEN 1 ELSE 0 END,
+			DESCRIPTION = #{description}
+		WHERE FARM_SEQ = CAST(#{farm_seq} AS INTEGER)
+	</update>
+	
+	<update id="updatePassword">
+		UPDATE LQS_FARM_INFO
+		SET
+			PASSWORD = #{password}
+		WHERE FARM_SEQ = CAST(#{farm_seq} AS INTEGER)
+	</update>
+	
+	<delete id="deleteFarm">
+		DELETE FROM LQS_FARM_INFO
+		WHERE FARM_SEQ = CAST(#{farm_seq} AS INTEGER)
+	</delete>
+</mapper>

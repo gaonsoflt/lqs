@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="egovframework.system.service.impl.CodeMapper">
+
+	<select id="retrieveParentCodes" parameterType="map" resultType="map">
+		with recursive vi_search_code as (
+			select 
+				array[c.cd] as hierarchy,
+				c.cd,
+				c.catgr,
+				c.cd_nm,
+				c.sort_no,
+				CASE WHEN c.use_yn='1' THEN true ELSE false end use_yn
+			from
+				sys_code_master c
+			where 
+				catgr = '0'
+			union all
+			select 
+				sc.hierarchy || c.cd,
+				c.cd,
+				c.catgr,
+				c.cd_nm,
+				c.sort_no,
+				CASE WHEN c.use_yn='1' THEN true ELSE false end use_yn
+			from	
+				sys_code_master c join vi_search_code sc
+			on
+				c.catgr= cast(sc.cd as varchar)
+		)
+		select 
+			cd, catgr, cd_nm, sort_no, use_yn 
+		from 
+			vi_search_code
+		where 
+		<![CDATA[ 
+			array_length(hierarchy, 1) <= 2
+		]]>
+		<if test='CATGR_NM != null'>
+			AND CD_NM LIKE '%' || #{CATGR_NM} || '%'
+		</if>
+		order by hierarchy
+	</select>
+	
+	<select id="retrieveCodeCount" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		FROM SYS_CODE_MASTER
+		<where>
+			<if test='CATGR != null'>
+				CATGR = #{CATGR}
+			</if>
+			<if test='CD_ID != null'>
+				AND CD_ID = #{CD_ID}
+			</if>
+		</where>
+	</select>
+	
+	<select id="retrieveChildCodes" parameterType="map" resultType="map">
+		SELECT *
+		FROM (
+			SELECT (ROW_NUMBER() OVER()) AS RNUM, A.*
+			FROM (
+				SELECT CD ,
+					CATGR ,
+					CD_NM ,
+					CD_ID ,
+					SORT_NO ,
+					CASE WHEN USE_YN='1' THEN true ELSE false end USE_YN,
+					REMARK ,
+					CRE_USR ,
+					CRE_DT ,
+					MOD_USR ,
+					MOD_DT
+				FROM SYS_CODE_MASTER
+				<where>
+					<if test='CATGR != null'>
+						CATGR = #{CATGR}
+					</if>
+					<if test='CD_ID != null'>
+						AND CD_ID = #{CD_ID}
+					</if>
+				</where>
+				ORDER BY SORT_NO
+			) A
+		) A
+		WHERE 1 = 1
+		<if test='PAGE != null'>
+		<![CDATA[
+	       AND A.RNUM > (#{PAGE} - 1) * #{PAGESIZE}
+	       AND A.RNUM <= #{PAGE} * #{PAGESIZE}
+    	]]>
+		</if>
+	</select>
+
+	<insert id="createCode">
+		INSERT INTO SYS_CODE_MASTER (
+			CD, 
+			CATGR, 
+			CD_NM, 
+			CD_ID, 
+			SORT_NO,
+			USE_YN, 
+			REMARK, 
+			CRE_USR, 
+			CRE_DT,
+			MOD_USR, 
+			MOD_DT
+		) VALUES (
+			nextval('sq_sys_code_master'),
+			#{catgr},
+			#{cd_nm},
+			#{cd_id},
+			CAST(#{sort_no} as integer),
+			CASE WHEN #{use_yn} = true THEN '1' ELSE '0' end,
+			#{remark},
+			#{cre_usr},
+			now(),
+			#{mod_usr},
+			now()
+		)
+	</insert>
+
+	<update id="updateCode">
+		UPDATE SYS_CODE_MASTER
+		SET 
+			CD_NM = #{cd_nm},
+			CD_ID = #{cd_id},
+			SORT_NO = #{sort_no},
+			USE_YN = CASE WHEN #{use_yn} = true THEN '1' ELSE '0' end,
+			REMARK = #{remark},
+			MOD_USR = #{mod_usr},
+			MOD_DT = now()
+		WHERE CD = #{cd}
+		AND CATGR = #{catgr}
+	</update>
+
+
+	<delete id="deleteCode">
+		DELETE 
+		FROM SYS_CODE_MASTER
+		WHERE CD = #{cd}
+		AND CATGR = #{catgr}
+	</delete>
+</mapper>

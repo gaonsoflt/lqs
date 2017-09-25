@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="egovframework.system.service.impl.AddressMapper">
+	<select id="retrieveAddress" parameterType="map" resultType="egovframework.system.vo.AddressVO">
+		SELECT
+			ADDRESS_SEQ,
+			ZONECODE,
+			JIBUN_ADDRESS,
+			ROAD_ADDRESS,
+			DETAIL_ADDRESS,
+			SIDO,
+			SIGUNGU,
+			SIGUNGU_CODE,
+			ROADNAME_CODE,
+			ROADNAME,
+			BUILDING_CODE,
+			BUILDING_NAME,
+			BCODE,
+			BNAME,
+			BNAME1
+		FROM SYS_ADDRESS
+  		WHERE ADDRESS_SEQ = CAST(#{address_seq} as integer)
+    </select>
+    
+	<insert id="createAddress" >
+		INSERT INTO SYS_ADDRESS (
+			ADDRESS_SEQ,
+			ZONECODE,
+			JIBUN_ADDRESS,
+			ROAD_ADDRESS,
+			DETAIL_ADDRESS,
+			SIDO,
+			SIGUNGU,
+			SIGUNGU_CODE,
+			ROADNAME_CODE,
+			ROADNAME,
+			BUILDING_CODE,
+			BUILDING_NAME,
+			BCODE,
+			BNAME,
+			BNAME1
+		) VALUES (
+			nextval('sq_sys_address'),
+			#{zonecode},
+			#{jibun_address},
+			#{road_address},
+			#{detail_address},
+			#{sido},
+			#{sigungu},
+			#{sigungu_code},
+			#{roadname_code},
+			#{roadname},
+			#{building_code},
+			#{building_name},
+			#{bcode},
+			#{bname},
+			#{bname1}
+		)
+		<selectKey keyProperty="address_seq" resultType="integer" order="AFTER">
+			SELECT currval('sq_sys_address') 
+		</selectKey>
+	</insert>
+
+	<update id="updateAddress" >
+		UPDATE SYS_ADDRESS 
+			SET 
+				ZONECODE = #{zonecode},
+				JIBUN_ADDRESS = #{jibun_address},
+				ROAD_ADDRESS = #{road_address},
+				DETAIL_ADDRESS = #{detail_address},
+				SIDO = #{sido},
+				SIGUNGU = #{sigungu},
+				SIGUNGU_CODE = #{sigungu_code},
+				ROADNAME_CODE = #{roadname_code},
+				ROADNAME = #{roadname},
+				BUILDING_CODE = #{building_code},
+				BUILDING_NAME = #{building_name},
+				BCODE = #{bcode},
+				BNAME = #{bname},
+				BNAME1 = #{bname1}
+  		WHERE ADDRESS_SEQ = CAST(#{address_seq} as integer)
+	</update>
+	
+    <delete id="deleteAddress" >
+		DELETE FROM SYS_ADDRESS
+  		WHERE ADDRESS_SEQ = CAST(#{address_seq} as integer)
+    </delete>
+</mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="egovframework.system.service.impl.GroupUserMapper">
+	<select id="retrieveNoGroupUsers" parameterType="map" resultType="map">
+		SELECT *
+		FROM (
+			SELECT (ROW_NUMBER() OVER()) AS RNUM, *
+			FROM (
+				SELECT 
+					USER_ID, 
+					USER_NAME,
+					BIRTHDAY
+				FROM SYS_USER_INFO
+				WHERE USE_YN = 1
+				AND USER_ID NOT IN (SELECT USER_ID 
+					FROM SYS_GROUP_USER 
+					WHERE GROUP_ID = cast(#{group_id} as integer))
+			) A 
+		) A
+		WHERE 1 = 1
+		ORDER BY USER_NAME DESC
+		<if test='PAGE != null'>
+		<![CDATA[
+	       AND A.RNUM > (#{PAGE} - 1) * #{PAGESIZE}
+	       AND A.RNUM <= #{PAGE} * #{PAGESIZE}
+    	]]>
+		</if>
+    </select>
+  			
+	<select id="retrieveGroupUsers" parameterType="map" resultType="map">
+		SELECT *
+		FROM (
+			SELECT (ROW_NUMBER() OVER()) AS RNUM, *
+			FROM (
+				SELECT 
+					USER_ID, 
+					USER_NAME,
+					BIRTHDAY
+				FROM SYS_USER_INFO
+				WHERE USE_YN = 1
+				AND USER_ID IN (SELECT USER_ID 
+					FROM SYS_GROUP_USER 
+					WHERE GROUP_ID = cast(#{group_id} as integer))
+			) A 
+		) A
+		WHERE 1 = 1
+		ORDER BY USER_NAME DESC
+		<if test='PAGE != null'>
+		<![CDATA[
+	       AND A.RNUM > (#{PAGE} - 1) * #{PAGESIZE}
+	       AND A.RNUM <= #{PAGE} * #{PAGESIZE}
+    	]]>
+		</if>
+	</select>
+	
+	<select id="retrieveUserGroups" parameterType="map" resultType="map">
+		SELECT 
+			A.group_id, 
+			B.group_name
+		FROM SYS_GROUP_USER A 
+		INNER JOIN SYS_GROUP B ON A.GROUP_ID = B.GROUP_ID
+		WHERE A.USER_ID = {user_id};
+	</select>
+	
+   	<insert id="createGroupUser">
+		INSERT INTO SYS_GROUP_USER (
+			USER_ID,
+			GROUP_ID
+		) VALUES (
+			#{user_id},
+			cast(#{group_id} as integer)
+		)
+	</insert>
+	
+	<delete id="deleteGroupUser">
+		DELETE FROM SYS_GROUP_USER
+		WHERE GROUP_ID = cast(#{group_id} as integer)
+	</delete>
+</mapper>

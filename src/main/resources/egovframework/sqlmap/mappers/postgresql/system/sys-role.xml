@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovframework.system.service.impl.RoleMapper">
+
+	<select id="retrieveRoles" parameterType="map" resultType="map">
+		SELECT
+			ROLE_ID,
+			ROLE_NAME,
+			DESCRIPTION,
+			CASE WHEN EDITABLED = 1 THEN true ELSE false END AS EDITABLED,
+			PARENT_ID,
+			CRE_DT,
+			MOD_DT
+		FROM SYS_ROLE
+		ORDER BY ROLE_NAME
+	</select>
+	
+	<select id="retrieveRole" parameterType="map" resultType="map">
+		SELECT
+			ROLE_ID,
+			ROLE_NAME,
+			DESCRIPTION,
+			CASE WHEN EDITABLED = 1 THEN true ELSE false END AS EDITABLED,
+			PARENT_ID,
+			CRE_DT,
+			MOD_DT
+		FROM SYS_ROLE
+		WHERE ROLE_ID = #{role_id}
+	</select>
+
+	<select id="retrieveRolesCount" parameterType="map" resultType="integer">
+		SELECT COUNT(*)
+		FROM 
+			SYS_ROLE
+	</select>
+
+	<insert id="createRole">
+		INSERT INTO SYS_ROLE (
+			ROLE_ID,
+			ROLE_NAME,
+			DESCRIPTION,
+			EDITABLED,
+			PARENT_ID,
+			CRE_DT,
+			MOD_DT
+		) VALUES (
+			nextval('sq_sys_role'), <!-- #{role_id}, -->
+			#{role_name},
+			#{description},
+			1,
+			#{parent_id},
+			now(),
+			now()
+		)
+	</insert>
+
+	<update id="updateRole">
+		UPDATE SYS_ROLE
+		SET 
+			ROLE_NAME = #{role_name},
+			DESCRIPTION = #{description},
+			PARENT_ID = #{parent_id},
+			MOD_DT = now()
+		WHERE ROLE_ID = #{role_id}
+		AND EDITABLED = 1
+	</update>
+
+	<delete id="deleteRole">
+		DELETE 
+		FROM SYS_ROLE
+		WHERE ROLE_ID = #{role_id}
+	</delete>
+
+</mapper>

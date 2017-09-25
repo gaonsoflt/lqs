@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="egovframework.bbs.service.impl.BBSReplyMapper"> 
+	
+	<select id="readRepliesByContent" parameterType="map" resultType="map">
+		SELECT *
+		FROM (
+			SELECT (ROW_NUMBER() OVER()) AS RNUM, A.*
+			FROM (
+				SELECT
+					reply_seq,
+					bbs_uid,
+					content_seq,
+					reply,
+					cre_usr,
+					cre_dt,
+					mod_dt,
+					parent_seq
+				FROM BBS_REPLY
+				WHERE content_seq = CAST(#{content_seq} as integer)
+				AND bbs_uid = #{bbs_uid}
+				ORDER BY cre_dt DESC
+			) A
+		) A
+		<where>
+			<if test='PAGE != null'>
+			<![CDATA[
+		       AND A.RNUM > (#{PAGE} - 1) * #{PAGESIZE}
+		       AND A.RNUM <= #{PAGE} * #{PAGESIZE}
+	    	]]>
+			</if>
+		</where>
+	</select>
+	
+	<select id="readRepliesCountByContent" parameterType="map" resultType="integer">
+		SELECT
+			count(*)
+		FROM BBS_REPLY
+		WHERE content_seq = CAST(#{content_seq} as integer)
+		AND bbs_uid = #{bbs_uid}
+	</select>
+	
+	<insert id="createReply">
+		INSERT INTO BBS_REPLY (
+			reply_seq,
+			bbs_uid,
+			content_seq,
+			reply,
+			parent_seq,
+			cre_usr,
+			cre_dt,
+			mod_dt
+		) VALUES (
+			nextval('sq_bbs_reply'), 
+			#{bbs_uid},
+			cast(#{content_seq} as integer),
+			#{reply}, 
+			cast(#{parent_seq} as integer),
+			#{cre_usr}, 
+			now(), 
+			now()
+		)
+	</insert>
+	
+	<update id="updateReply">
+		UPDATE BBS_REPLY
+		SET 
+			reply = #{reply},
+			mod_dt = now()
+		WHERE reply_seq = cast(#{reply_seq} as integer)
+	</update>
+	
+	<delete id="deleteReply">
+		DELETE FROM BBS_REPLY
+		WHERE reply_seq = CAST(#{reply_seq} as integer) 
+	</delete>
+	
+	<delete id="deleteReplyByContent">
+		DELETE FROM BBS_REPLY
+		WHERE content_seq = CAST(#{content_seq} as integer)
+	</delete>
+</mapper>

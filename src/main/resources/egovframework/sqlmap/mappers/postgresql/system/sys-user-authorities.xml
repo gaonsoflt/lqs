@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="egovframework.system.service.impl.UserAuthoritiesMapper">
+	<select id="retrieveRolesUser" parameterType="map" resultType="map">
+		SELECT
+			A.*,
+			CASE WHEN A.ROLE_ID IS NOT NULL THEN TRUE ELSE FALSE END AS IS_ROLE
+		FROM (
+			SELECT 
+				B.USER_ID,
+				B.USER_NAME,
+				B.BIRTHDAY,
+				C.ROLE_ID
+			FROM (
+			<if test="group_id != 0">
+				SELECT GROUP_ID, USER_ID
+				FROM SYS_GROUP_USER
+				WHERE GROUP_ID = cast(#{group_id} as integer) 
+			) A LEFT JOIN (
+			</if>
+				SELECT PRINCIPLE, USER_ID, USER_NAME, USER_TYPE, BIRTHDAY 
+				FROM SYS_USER_INFO
+			) B
+			<if test="group_id != 0">
+			ON A.USER_ID = B.USER_ID
+			</if>
+			LEFT JOIN (
+				SELECT ROLE_ID, USER_ID 
+				FROM SYS_USER_AUTHORITIES 
+				WHERE ROLE_ID = #{role_id}
+			) C ON B.USER_ID = C.USER_ID
+		) A
+		ORDER BY A.USER_NAME
+	</select>
+
+	<select id="retrieveAuthoritiesByUser" parameterType="map" resultType="map">
+		SELECT
+			role_id
+		FROM SYS_USER_AUTHORITIES
+		WHERE user_id = #{user_id}
+	</select>
+	
+	<insert id="createAuthority">
+		INSERT INTO	SYS_USER_AUTHORITIES (
+			USER_ID,
+			ROLE_ID
+		) VALUES (
+			#{user_id},
+			#{role_id}
+		)
+	</insert>
+	
+	<delete id="deleteAuthority">
+		DELETE FROM SYS_USER_AUTHORITIES
+		WHERE USER_ID = #{user_id}
+		AND ROLE_ID = #{role_id}
+	</delete>
+	
+	<delete id="deleteAuthorityByUserID">
+		DELETE FROM SYS_USER_AUTHORITIES
+		WHERE USER_ID = #{user_id}
+	</delete>
+</mapper>

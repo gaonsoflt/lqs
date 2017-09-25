@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="egovframework.lqs.service.impl.CarMapper">
+	<select id="retrieveCars" parameterType="map" resultType="map">
+		SELECT *
+		FROM (
+			SELECT (ROW_NUMBER() OVER()) AS RNUM, A.*
+			FROM (
+				SELECT
+					CAR_NO,
+					OWNER,
+					TYPE,
+					(SELECT CD_NM FROM SYS_CODE_MASTER WHERE CD_ID = TYPE) AS TYPE_NAME,
+					MODEL,
+					MAKER,
+					SINCE_YEAR,
+					FUEL_TYPE,
+					COMPANY,
+					BIZ_TYPE,
+					(SELECT CD_NM FROM SYS_CODE_MASTER WHERE CD_ID = BIZ_TYPE) AS BIZ_TYPE_NAME,
+					DESCRIPTION,
+					CRE_USR,
+					CRE_DT
+				FROM LQS_CAR_INFO
+				ORDER BY CAR_NO
+			) A
+			<where>
+				<if test="car_no != null">
+					AND A.CAR_NO = #{car_no}
+				</if>
+			</where>
+		) A
+		<where>
+			<if test='PAGE != null'>
+			<![CDATA[
+		       AND A.RNUM > (#{PAGE} - 1) * #{PAGESIZE}
+		       AND A.RNUM <= #{PAGE} * #{PAGESIZE}
+	    	]]>
+			</if>
+		</where>
+	</select>
+	
+	<select id="retrieveCarsCount" parameterType="map" resultType="integer">
+		SELECT
+			COUNT(*)
+		FROM LQS_CAR_INFO 
+		<where>
+			<if test="car_no != null">
+				AND CAR_NO = #{car_no}
+			</if>
+		</where>
+	</select>
+	
+	<insert id="createCar">
+		INSERT INTO LQS_CAR_INFO (
+			CAR_NO,
+			OWNER,
+			TYPE,
+			MODEL,
+			MAKER,
+			SINCE_YEAR,
+			FUEL_TYPE,
+			COMPANY,
+			BIZ_TYPE,
+			DESCRIPTION,
+			CRE_USR,
+			CRE_DT
+		) VALUES (
+			#{car_no},
+			#{owner},
+			#{type},
+			#{model},
+			#{maker},
+			cast(#{since_year} as integer),
+			#{fuel_type},
+			#{company},
+			#{biz_type},
+			#{description},
+			#{cre_usr},
+			now()
+		)
+	</insert>
+	
+	<update id="updateCar">
+		UPDATE LQS_CAR_INFO
+		SET
+			car_no= #{car_no},
+			owner = #{owner},
+			type = #{type},
+			model = #{model},
+			MAKER = #{maker},
+			SINCE_YEAR = cast(#{since_year} as integer),
+			FUEL_TYPE = #{fuel_type},
+			COMPANY = #{company},
+			BIZ_TYPE = #{biz_type},
+			DESCRIPTION = #{description}
+		WHERE CAR_NO = #{car_no}
+	</update>
+	
+	<delete id="deleteCar">
+		DELETE FROM LQS_CAR_INFO
+		WHERE CAR_NO = #{car_no}
+	</delete>
+</mapper>

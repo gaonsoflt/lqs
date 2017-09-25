@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="egovframework.system.service.impl.SecuredResRoleMapper">
+	<select id="retrieveSecuredResRole" parameterType="map" resultType="map">
+		SELECT *
+		FROM (
+			SELECT (ROW_NUMBER() OVER()) AS RNUM, A.*
+			FROM (
+				SELECT
+					A.RES_ID,
+					A.RES_NAME,
+					A.RES_PATTERN,
+					A.DESCRIPTION,
+					A.RES_TYPE,
+					A.SORT_ORDER,
+					CASE WHEN B.RES_ID IS NOT NULL THEN TRUE ELSE FALSE END AS IS_AUTH
+				FROM SYS_SECURED_RES A LEFT JOIN (
+					SELECT * FROM SYS_SECURED_RES_ROLE WHERE ROLE_ID = #{role_id}
+				) B ON A.RES_ID = B.RES_ID 
+				<where>
+					<if test="G_UserNmVal != null">
+						AND USER_NAME LIKE '%'||#{G_UserNmVal}||'%'
+					</if>
+				</where>
+				ORDER BY SORT_ORDER
+			) A
+		) A
+		<where>
+			<if test='PAGE != null and PAGESIZE != null'>
+			<![CDATA[
+		       AND A.RNUM > (#{PAGE} - 1) * #{PAGESIZE}
+		       AND A.RNUM <= #{PAGE} * #{PAGESIZE}
+	    	]]>
+			</if>
+		</where>
+	</select>
+	
+	<select id="retrieveSecuredResRolesCount" parameterType="map" resultType="integer">
+		SELECT
+			count(*)
+		FROM SYS_SECURED_RES_ROLE
+		<where>
+			<if test="G_UserNmVal != null">
+				AND USER_NAME LIKE '%'||#{G_UserNmVal}||'%'
+			</if>
+		</where>
+	</select>
+	
+	
+	<insert id="createSecuredResRole">
+		INSERT INTO SYS_SECURED_RES_ROLE (
+			res_id,
+			role_id
+		) VALUES (
+			#{res_id},
+			#{role_id}
+		)
+	</insert>
+	
+	<delete id="deleteSecuredResRole">
+		DELETE 
+		FROM SYS_SECURED_RES_ROLE
+		WHERE res_id = #{res_id}
+		AND role_id = #{role_id}
+	</delete>
+</mapper>

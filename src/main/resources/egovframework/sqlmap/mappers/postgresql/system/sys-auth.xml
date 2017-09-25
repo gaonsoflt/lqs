@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovframework.system.service.impl.AuthMapper">
+
+	<select id="retrieveGroupAuth" parameterType="egovframework.system.vo.AuthVO" resultType="map">
+		SELECT *
+		FROM (
+			SELECT 
+				A.*,
+				(SELECT COUNT(*) FROM SYS_GROUP_USER WHERE GROUP_ID = A.GROUP_ID) AS MEMBER_COUNT,
+				C.ROLES,
+				CASE WHEN B.MENU_SEQ IS NULL THEN CAST(#{menu_seq} AS INTEGER) ELSE B.MENU_SEQ END AS MENU_SEQ,
+				CASE WHEN B.TARGET_ID IS NULL THEN CAST(A.GROUP_ID AS VARCHAR) ELSE B.TARGET_ID END AS TARGET_ID,
+				CASE WHEN B.TARGET_TYPE IS NULL THEN #{target_type} ELSE B.TARGET_TYPE END AS TARGET_TYPE,
+				B.AUTH_C,
+				B.AUTH_R,
+				B.AUTH_U,
+				B.AUTH_D,
+				B.AUTH_P
+			FROM SYS_GROUP A 
+			LEFT JOIN (SELECT * 
+						FROM SYS_AUTH 
+						WHERE TARGET_TYPE = #{target_type} 
+						AND MENU_SEQ = cast(#{menu_seq} as integer)
+			) B ON A.GROUP_ID = CAST(B.TARGET_ID AS INTEGER)
+			LEFT JOIN (SELECT A.GROUP_ID, ARRAY_TO_STRING(ARRAY_AGG(B.ROLE_ID),',') AS ROLES 
+						FROM SYS_GROUP_AUTHORITIES A INNER JOIN SYS_ROLE B ON A.ROLE_ID = B.ROLE_ID 
+						GROUP BY A.GROUP_ID
+			) C ON A.GROUP_ID = C.GROUP_ID
+		UNION SELECT 0, '모든 유저', (SELECT COUNT(*) FROM SYS_USER_INFO), '', CAST(#{menu_seq} AS INTEGER), '0', #{target_type}, -1, -1, -1, -1, -1) A
+		ORDER BY GROUP_ID, GROUP_NAME
+	</select>
+
+	<select id="retrieveRoleAuth" parameterType="egovframework.system.vo.AuthVO" resultType="map">
+		SELECT 
+			A.MENU_SEQ,
+			A.MENU_NAME,
+			A.MENU_ORDER,
+			CASE WHEN C.MENU_SEQ IS NULL THEN 0 ELSE C.MENU_SEQ END AS MENU_SEQ,
+			CASE WHEN C.MENU_NAME IS NULL THEN 'ROOT' ELSE C.MENU_NAME END AS MAIN_NAME,
+			C.MENU_ORDER AS MAIN_ORDER,
+			CASE WHEN B.TARGET_TYPE IS NULL THEN #{target_type} ELSE B.TARGET_TYPE END AS TARGET_TYPE,
+			B.TARGET_ID,
+			B.MENU_SEQ,
+			CASE WHEN B.AUTH_C > 0 THEN TRUE ELSE FALSE END AS AUTH_C,
+			B.AUTH_R,
+			B.AUTH_U,
+			B.AUTH_D,
+			B.AUTH_P
+		FROM (SELECT MENU_SEQ, MENU_NAME, MENU_ORDER, PARENT_SEQ 
+			FROM SYS_MENU_INFO 
+			WHERE MENU_SEQ NOT IN (SELECT DISTINCT PARENT_SEQ FROM SYS_MENU_INFO)
+		) A 
+		LEFT JOIN (SELECT * 
+					FROM SYS_AUTH 
+					WHERE TARGET_TYPE = #{target_type}
+					AND TARGET_ID = #{target_id}
+		) B ON A.MENU_SEQ = B.MENU_SEQ
+		LEFT JOIN (SELECT MENU_SEQ, MENU_NAME, MENU_ORDER 
+					FROM SYS_MENU_INFO
+		) C ON A.PARENT_SEQ = C.MENU_SEQ
+		ORDER BY C.MENU_ORDER, A.MENU_ORDER
+	</select>
+
+	<select id="retrieveAuthsCount" parameterType="map" resultType="integer">
+		SELECT COUNT(*)
+		FROM 
+			SYS_AUTH
+	</select>
+	
+	<select id="retrievePageAuthByLogged" parameterType="map" resultType="map">
+		SELECT 
+			MENU_SEQ,
+			(SELECT MENU_ID FROM SYS_MENU_INFO WHERE MENU_SEQ = cast(#{menu_seq} as integer)) AS MENU_ID, 
+			CASE WHEN SUM(AUTH_C) = 0 THEN FALSE ELSE TRUE END AS AUTH_C,
+			CASE WHEN SUM(AUTH_R) = 0 THEN FALSE ELSE TRUE END AS AUTH_R,
+			CASE WHEN SUM(AUTH_U) = 0 THEN FALSE ELSE TRUE END AS AUTH_U,
+			CASE WHEN SUM(AUTH_D) = 0 THEN FALSE ELSE TRUE END AS AUTH_D,
+			CASE WHEN SUM(AUTH_P) = 0 THEN FALSE ELSE TRUE END AS AUTH_P
+		FROM SYS_AUTH
+		WHERE MENU_SEQ = cast(#{menu_seq} as integer)
+		AND TARGET_ID IN (
+			SELECT 
+				ROLE_ID 
+			FROM SYS_USER_AUTHORITIES 
+			WHERE USER_ID = #{user_id}
+			UNION
+			SELECT 
+				ROLE_ID
+			FROM SYS_GROUP_AUTHORITIES 
+			WHERE GROUP_ID IN (SELECT GROUP_ID FROM SYS_GROUP_USER WHERE USER_ID = #{user_id})
+		)
+		GROUP BY MENU_SEQ
+	</select>
+
+	<insert id="createAuth" parameterType="egovframework.system.vo.AuthVO">
+		INSERT INTO SYS_AUTH (
+			MENU_SEQ,
+			TARGET_ID,
+			TARGET_TYPE,
+			AUTH_C,
+			AUTH_R,
+			AUTH_U,
+			AUTH_D,
+			AUTH_P
+		) VALUES (
+			cast(#{menu_seq} as integer),
+			#{target_id},
+			#{target_type},
+			CASE WHEN #{auth_c} = true THEN 1 ELSE 0 end,
+			CASE WHEN #{auth_r} = true THEN 1 ELSE 0 end,
+			CASE WHEN #{auth_u} = true THEN 1 ELSE 0 end,
+			CASE WHEN #{auth_d} = true THEN 1 ELSE 0 end,
+			CASE WHEN #{auth_p} = true THEN 1 ELSE 0 end
+		)
+	</insert>
+
+	<update id="updateAuth" parameterType="egovframework.system.vo.AuthVO">
+		UPDATE SYS_AUTH
+		SET 
+			AUTH_C = CASE WHEN #{auth_c} = true THEN 1 ELSE 0 end,
+			AUTH_R = CASE WHEN #{auth_r} = true THEN 1 ELSE 0 end,
+			AUTH_U = CASE WHEN #{auth_u} = true THEN 1 ELSE 0 end,
+			AUTH_D = CASE WHEN #{auth_d} = true THEN 1 ELSE 0 end,
+			AUTH_P = CASE WHEN #{auth_p} = true THEN 1 ELSE 0 end
+		WHERE MENU_SEQ = cast(#{menu_seq} as integer)
+		AND TARGET_ID = #{target_id}
+		AND TARGET_TYPE = #{target_type}
+	</update>
+
+	<delete id="deleteAuth" parameterType="egovframework.system.vo.AuthVO">
+		DELETE 
+		FROM SYS_AUTH
+		WHERE MENU_SEQ = cast(#{menu_seq} as integer)
+		AND TARGET_ID = #{target_id}
+		AND TARGET_TYPE = #{target_type}
+	</delete>
+
+</mapper>

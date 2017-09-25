@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovframework.bbs.service.impl.BBSContentMapper">
+	<select id="readContents" parameterType="map" resultType="map">
+		SELECT *
+			FROM (
+				SELECT (ROW_NUMBER() OVER()) AS RNUM, A.*
+				FROM (
+					SELECT
+					 	A.content_seq,
+					 	A.bbs_uid,
+						A.title,
+						A.content,
+						A.cre_dt,
+						A.cre_usr,
+						A.mod_dt,
+						A.mod_usr,
+						case when B.recnt isnull then 0 else B.recnt end as recnt
+					FROM bbs_content A
+					left join (select content_seq, count(content_seq) as recnt from bbs_reply WHERE bbs_uid = #{bbs_uid} group by content_seq) B on A.content_seq = B.content_seq  
+    				WHERE bbs_uid = #{bbs_uid}
+		       		<if test="CONDITION eq 'TITLE'">
+		       			AND title LIKE '%'||#{KEYWORD}||'%'
+		       		</if>
+				ORDER BY cre_dt DESC
+			) A
+		) A
+		WHERE 1 = 1
+		<if test='PAGE != null'>
+		<![CDATA[
+			AND A.RNUM > (#{PAGE} - 1) * #{PAGESIZE}
+			AND A.RNUM <= #{PAGE} * #{PAGESIZE}
+    	]]>
+		</if>
+	</select>
+	
+	<select id="readContent" parameterType="map" resultType="map">
+		SELECT
+			content_seq,
+		 	bbs_uid,
+			title,
+			content,
+			cre_dt,
+			cre_usr,
+			mod_dt,
+			mod_usr
+		FROM bbs_content
+		WHERE content_seq = cast(#{content_seq} as integer)
+		AND bbs_uid = #{bbs_uid}
+	</select>
+	
+	<select id="readContentCount" parameterType="map" resultType="integer">
+		SELECT count(*)
+		FROM bbs_content
+		WHERE bbs_uid = #{bbs_uid}
+   		<if test="CONDITION eq 'TITLE'">
+   			AND title LIKE '%'||#{KEYWORD}||'%'
+   		</if>
+	</select>
+	
+	<insert id="createContent">
+		<selectKey keyProperty="seq" resultType="integer" order="BEFORE">
+			select 
+				CASE WHEN max(content_seq) isnull THEN 1 ELSE max(content_seq)+1 end seq 
+			from bbs_content
+			where bbs_uid = #{bbs_uid}
+		</selectKey>
+		INSERT INTO bbs_content (
+			content_seq,
+		 	bbs_uid,
+			title,
+			content,
+			cre_dt,
+			cre_usr,
+			mod_dt,
+			mod_usr
+		) VALUES (
+			cast(#{seq} as integer),
+			#{bbs_uid},
+			#{title}, 
+			#{content}, 
+			now(), 
+			#{cre_usr}, 
+			now(), 
+			#{mod_usr} 
+		)
+	</insert>
+	
+	<update id="updateContent">
+		UPDATE bbs_content
+		SET 
+			title = #{title},
+			content = #{content},
+			mod_dt = now(), 
+			mod_usr = #{mod_usr} 
+		WHERE content_seq = cast(#{content_seq} as integer)
+		AND bbs_uid = #{bbs_uid}
+	</update>
+	
+	<delete id="deleteContent">
+		DELETE FROM bbs_content 
+		WHERE content_seq = cast(#{content_seq} as integer)
+		AND bbs_uid = #{bbs_uid}
+	</delete>
+	
+	<delete id="deleteContentByBBS">
+		DELETE FROM bbs_content 
+		WHERE bbs_uid = #{bbs_uid}
+	</delete>
+</mapper>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="egovframework.system.service.impl.BBSMapper"> 
+	<update id="createTable" parameterType="map">
+		CREATE TABLE IF NOT EXISTS tb_bbs_${table_name} (
+	        seq int4 NOT NULL,
+			title varchar(255) NOT NULL,
+			content text,
+			reg_dt timestamp,
+			reg_usr varchar(64),
+			mod_dt timestamp,
+			mod_usr varchar(64),
+			PRIMARY KEY (seq)
+  		)
+	</update>
+	
+	<update id="dropTable" parameterType="map">
+		DROP TABLE tb_bbs_${table_name}
+	</update>
+	
+	<select id="selectBBSList" parameterType="map" resultType="map">
+		SELECT *
+			FROM (
+				SELECT (ROW_NUMBER() OVER()) AS RNUM, A.*
+				FROM (
+					SELECT
+						bbs_uid,
+						bbs_id,
+						bbs_name,
+						description,
+						CASE WHEN attached=1 THEN true ELSE false end attached,
+						cre_dt
+					FROM SYS_BBS_INFO
+				ORDER BY bbs_name
+			) A
+		) A
+		WHERE 1 = 1
+		<if test='PAGE != null'>
+		<![CDATA[
+			AND A.RNUM > (#{PAGE} - 1) * #{PAGESIZE}
+			AND A.RNUM <= #{PAGE} * #{PAGESIZE}
+    	]]>
+		</if>
+	</select>
+	
+	<select id="selectBBS" parameterType="map" resultType="map">
+		SELECT 
+			bbs_uid,
+			bbs_id,
+			bbs_name,
+			description,
+			CASE WHEN attached=1 THEN true ELSE false end attached,
+			cre_dt
+		FROM SYS_BBS_INFO
+		WHERE bbs_uid = #{bbs_uid}
+	</select>
+	
+	<select id="retrieveNotMenuBBS" resultType="map">
+		SELECT 
+			bbs_uid,
+			bbs_id,
+			bbs_name
+		FROM SYS_BBS_INFO
+		WHERE BBS_UID NOT IN (
+			SELECT 
+				BBS_UID 
+			FROM SYS_MENU_INFO 
+			WHERE BBS_UID IS NOT NULL 
+			<![CDATA[
+			AND BBS_UID <> ''
+			]]>
+		)
+	</select>
+	
+	<select id="selectBBSListCount" parameterType="map" resultType="integer">
+		SELECT COUNT(*)
+		FROM SYS_BBS_INFO
+	</select>
+	
+	<insert id="createBBS">
+		INSERT INTO SYS_BBS_INFO (
+			bbs_uid,
+			bbs_id,
+			bbs_name,
+			description,
+			attached,
+			cre_dt
+		) VALUES (
+			#{bbs_uid}, 
+			#{bbs_id}, 
+			#{bbs_name}, 
+			#{description}, 
+			CASE WHEN #{attached} = true THEN 1 ELSE 0 end,
+			now() 
+		)
+	</insert>
+	
+	<update id="updateBBS">
+		UPDATE SYS_BBS_INFO
+		SET
+			bbs_id = #{bbs_id},
+			bbs_name = #{bbs_name},
+			description = #{description}, 
+			attached = CASE WHEN #{attached} = true THEN 1 ELSE 0 end
+		WHERE bbs_uid = #{bbs_uid}
+	</update>
+	
+	<delete id="deleteBBS">
+		DELETE FROM SYS_BBS_INFO
+		WHERE bbs_uid = #{bbs_uid}
+	</delete>
+</mapper>

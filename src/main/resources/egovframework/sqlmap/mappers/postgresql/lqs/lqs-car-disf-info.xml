@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="egovframework.lqs.service.impl.CarDisfInfoMapper">
+	<select id="retrieveCarDisfInfo" parameterType="map" resultType="map">
+		SELECT *
+		FROM (
+			SELECT (ROW_NUMBER() OVER()) AS RNUM, A.*
+			FROM (
+				SELECT
+					A.CAR_NO,
+					D.OWNER,
+					CASE WHEN D.CAR_NO IS NULL THEN '' ELSE D.CAR_NO END AS REF_CAR_NO,
+					A.FACILITY_SEQ,
+					B.FACILITY_NAME,
+					B.ADDRESS_SEQ,
+					C.SIDO,
+					C.SIGUNGU,
+					A.DISF_DT,
+					A.ADMIT_DT
+				FROM LQS_CAR_DISF_INFO A 
+				LEFT JOIN 
+				(SELECT * FROM LQS_DISF_FACILITY) B ON A.FACILITY_SEQ = B.FACILITY_SEQ
+				LEFT JOIN 
+				(SELECT * FROM SYS_ADDRESS) C ON B.ADDRESS_SEQ = C.ADDRESS_SEQ
+				LEFT JOIN 
+				(SELECT * FROM LQS_CAR_INFO) D ON A.CAR_NO = D.CAR_NO
+				ORDER BY A.DISF_DT DESC
+			) A
+			<where>
+				<if test="car_no != null">
+					AND A.CAR_NO = #{car_no}
+				</if>
+			</where>
+		) A
+		<where>
+			<if test='PAGE != null'>
+			<![CDATA[
+		       AND A.RNUM > (#{PAGE} - 1) * #{PAGESIZE}
+		       AND A.RNUM <= #{PAGE} * #{PAGESIZE}
+	    	]]>
+			</if>
+		</where>
+	</select>
+	
+	<select id="retrieveCarDisfInfoCount" parameterType="map" resultType="integer">
+		SELECT
+			COUNT(*)
+		FROM LQS_CAR_DISF_INFO 
+		<where>
+			<if test="car_no != null">
+				AND CAR_NO = #{car_no}
+			</if>
+		</where>
+	</select>
+	
+	<insert id="createCarDisfInfo">
+		INSERT INTO LQS_CAR_DISF_INFO (
+			CAR_NO,
+			FACILITY_SEQ,
+			DISF_DT,
+			ADMIT_DT
+		) VALUES (
+			#{car_no},
+			CAST(#{facility_seq} AS INTEGER),
+			#{disf_dt},
+			#{admit_dt}
+		)
+	</insert>
+	
+	<update id="updateCarDisfInfo">
+		UPDATE LQS_CAR_DISF_INFO
+		SET
+			ADMIT_DT = #{admit_dt}
+		WHERE CAR_NO = #{car_no}
+		AND FACILITY_SEQ = CAST(#{facility_seq} AS INTEGER)
+		AND DISF_DT = #{disf_dt}
+	</update>
+
+</mapper>

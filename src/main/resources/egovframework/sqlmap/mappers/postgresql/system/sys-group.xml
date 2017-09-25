@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="egovframework.system.service.impl.GroupMapper">
+    <select id="retrieveGroupsCount" parameterType="map" resultType="integer">
+		SELECT 
+			count(*)
+		FROM SYS_GROUP
+		<if test="group_id != null">
+			WHERE GROUP_ID = cast(#{group_id} as integer)
+		</if>
+    </select>
+  			
+	<select id="retrieveGroups" parameterType="map" resultType="map">
+		SELECT *
+		FROM (
+			SELECT (ROW_NUMBER() OVER()) AS RNUM, *
+			FROM (
+				SELECT 
+					GROUP_ID, 
+					GROUP_NAME
+				FROM SYS_GROUP
+				<if test="group_id != null">
+					WHERE GROUP_ID = cast(#{group_id} as integer)
+				</if>
+			) A 
+		) A
+		WHERE 1 = 1
+		<if test='PAGE != null'>
+		<![CDATA[
+	       AND A.RNUM > (#{PAGE} - 1) * #{PAGESIZE}
+	       AND A.RNUM <= #{PAGE} * #{PAGESIZE}
+    	]]>
+		</if>
+		ORDER BY GROUP_NAME DESC
+	</select>
+	
+    <insert id="createGroup">
+		INSERT INTO SYS_GROUP(
+			GROUP_ID,
+			GROUP_NAME
+		) VALUES (
+			nextval('sq_sys_group'),
+			#{group_name}
+		)
+	</insert>
+	
+    <update id="updateGroup">
+		UPDATE SYS_GROUP
+		SET 
+			group_name = #{group_name}
+		WHERE GROUP_ID = cast(#{group_id} as integer)
+	</update>
+	
+	<delete id="deleteGroup">
+		DELETE FROM SYS_GROUP
+		WHERE GROUP_ID = cast(#{group_id} as integer)	
+	</delete>
+</mapper>

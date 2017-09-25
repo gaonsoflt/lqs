@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="egovframework.lqs.service.impl.DisfFacilityMapper">
+	<select id="retrieveDisfFacility" parameterType="map" resultType="map">
+		SELECT *
+		FROM (
+			SELECT (ROW_NUMBER() OVER()) AS RNUM, A.*
+			FROM (
+				SELECT
+					A.FACILITY_SEQ,
+					A.FACILITY_NAME,
+					A.PHONE,
+					A.DESCRIPTION,
+					A.CRE_DT,
+					B.ADDRESS_SEQ,
+					B.ZONECODE,
+					B.JIBUN_ADDRESS,
+					B.ROAD_ADDRESS,
+					B.DETAIL_ADDRESS,
+					B.SIDO,
+					B.SIGUNGU,
+					B.SIGUNGU_CODE,
+					B.ROADNAME_CODE,
+					B.ROADNAME,
+					B.BUILDING_CODE,
+					B.BUILDING_NAME,
+					B.BCODE,
+					B.BNAME,
+					B.BNAME1
+				FROM LQS_DISF_FACILITY A 
+				LEFT JOIN 
+				SYS_ADDRESS B ON A.ADDRESS_SEQ = B.ADDRESS_SEQ 
+				ORDER BY A.FACILITY_SEQ
+			) A
+			<where>
+				<if test="facility_seq != null">
+					AND A.FACILITY_SEQ = CAST(#{facility_seq} AS INTEGER)
+				</if>
+			</where>
+		) A
+		<where>
+			<if test='PAGE != null'>
+			<![CDATA[
+		       AND A.RNUM > (#{PAGE} - 1) * #{PAGESIZE}
+		       AND A.RNUM <= #{PAGE} * #{PAGESIZE}
+	    	]]>
+			</if>
+		</where>
+	</select>
+	
+	<select id="retrieveDisfFacilityCount" parameterType="map" resultType="integer">
+		SELECT
+			COUNT(*)
+		FROM LQS_DISF_FACILITY 
+		<where>
+			<if test="facility_seq != null">
+				AND FACILITY_SEQ = CAST(#{facility_seq} AS INTEGER)
+			</if>
+		</where>
+	</select>
+	
+	<insert id="createDisfFacility">
+		INSERT INTO LQS_DISF_FACILITY (
+			FACILITY_SEQ,
+			FACILITY_NAME,
+			PHONE,
+			ADDRESS_SEQ,
+			DESCRIPTION,
+			CRE_DT
+		) VALUES (
+			nextval('sq_lqs_disf_facility'),
+			#{facility_name},
+			#{phone},
+			CAST(#{address_seq} as integer),
+			#{description},
+			now()
+		)
+	</insert>
+	
+	<update id="updateDisfFacility">
+		UPDATE LQS_DISF_FACILITY
+		SET
+			FACILITY_NAME = #{facility_name},
+			PHONE = #{phone},
+			DESCRIPTION = #{description}
+		WHERE FACILITY_SEQ = CAST(#{facility_seq} AS INTEGER)
+	</update>
+	
+	<delete id="deleteDisfFacility">
+		DELETE FROM LQS_DISF_FACILITY
+		WHERE FACILITY_SEQ = CAST(#{facility_seq} AS INTEGER)
+	</delete>
+</mapper>

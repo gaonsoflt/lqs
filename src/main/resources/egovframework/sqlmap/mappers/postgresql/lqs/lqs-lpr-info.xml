@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="egovframework.lqs.service.impl.LprMapper">
+	<select id="retrieveLprs" parameterType="map" resultType="map">
+		SELECT *
+		FROM (
+			SELECT (ROW_NUMBER() OVER()) AS RNUM, A.*
+			FROM (
+				SELECT
+					LPR_SEQ,
+					MODEL,
+					LOC_TYPE,
+					LOC_SEQ,
+					CASE WHEN LOC_TYPE = 'L' THEN (SELECT FACILITY_NAME FROM LQS_DISF_FACILITY WHERE FACILITY_SEQ = LOC_SEQ)
+						ELSE (SELECT FARM_NAME FROM LQS_FARM_INFO WHERE FARM_SEQ = LOC_SEQ) END AS LOC_NAME, 
+					DESCRIPTION,
+					CASE WHEN IS_ALIVE = 1 THEN true ELSE false END AS IS_ALIVE,
+					LAST_ALIVE_DT,
+					CRE_DT
+				FROM LQS_LPR_INFO
+				ORDER BY LPR_SEQ
+			) A
+			<where>
+				<if test="lpr_seq != null">
+					AND A.LPR_SEQ = CAST(#{lpr_seq} AS INTEGER)
+				</if>
+			</where>
+		) A
+		<where>
+			<if test='PAGE != null'>
+			<![CDATA[
+		       AND A.RNUM > (#{PAGE} - 1) * #{PAGESIZE}
+		       AND A.RNUM <= #{PAGE} * #{PAGESIZE}
+	    	]]>
+			</if>
+		</where>
+	</select>
+	
+	<select id="retrieveLprsCount" parameterType="map" resultType="integer">
+		SELECT
+			COUNT(*)
+		FROM LQS_LPR_INFO 
+		<where>
+			<if test="lpr_seq != null">
+				AND LPR_SEQ = CAST(#{lpr_seq} AS INTEGER)
+			</if>
+		</where>
+	</select>
+	
+	<insert id="createLpr">
+		INSERT INTO LQS_LPR_INFO (
+			LPR_SEQ,
+			MODEL,
+			LOC_TYPE,
+			LOC_SEQ,
+			DESCRIPTION,
+			CRE_DT
+		) VALUES (
+			nextval('sq_lqs_lpr_info'),
+			#{model},
+			#{loc_type},
+			CAST(#{loc_seq} AS INTEGER),
+			#{description},
+			now()
+		)
+	</insert>
+	
+	<update id="updateLpr">
+		UPDATE LQS_LPR_INFO
+		SET
+			MODEL = #{model},
+			LOC_TYPE = #{loc_type},
+			LOC_SEQ = CAST(#{loc_seq} AS INTEGER),
+			DESCRIPTION = #{description}
+		WHERE LPR_SEQ = CAST(#{lpr_seq} AS INTEGER)
+	</update>
+	
+	<update id="updateLprLocation">
+		UPDATE LQS_LPR_INFO
+		SET
+			LOC_TYPE = #{loc_type},
+			LOC_SEQ = CAST(#{loc_seq} AS INTEGER)
+		WHERE LPR_SEQ = CAST(#{lpr_seq} AS INTEGER)
+	</update>
+	
+	<update id="updateLprAliveStatus">
+		UPDATE LQS_LPR_INFO
+		SET
+			IS_ALIVE = CASE WHEN #{is_alive} = true THEN 1 ELSE 0 END,
+			LAST_ALIVE_DT = now()
+		WHERE LPR_SEQ = CAST(#{lpr_seq} AS INTEGER)
+	</update>
+	
+	<delete id="deleteLpr">
+		DELETE FROM LQS_LPR_INFO
+		WHERE LPR_SEQ = CAST(#{lpr_seq} AS INTEGER)
+	</delete>
+</mapper>

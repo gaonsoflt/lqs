@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="egovframework.system.service.impl.MenuMapper">
+
+	<select id="selectMenus" parameterType="map" resultType="map">
+		SELECT
+			A.MENU_SEQ,
+			A.MENU_ID,
+			A.MENU_NAME,
+			A.MENU_TYPE,
+			A.DESCRIPTION,
+			A.MENU_URL,
+			A.MENU_ICON,
+			A.MENU_ORDER,
+			CASE WHEN A.USE_YN=1 THEN true ELSE false end USE_YN,
+			A.BBS_UID,
+			A.PARENT_SEQ,
+			CASE WHEN A.PARENT_SEQ=0 THEN 'Root' ELSE B.MENU_NAME end AS PARENT_NAME
+		FROM SYS_MENU_INFO A
+		LEFT JOIN SYS_MENU_INFO B ON A.PARENT_SEQ = B.MENU_SEQ
+		<where>
+			<if test="menu_seq != null">
+	   			AND A.MENU_SEQ = cast(#{menu_seq} as integer)
+			</if>
+		</where>
+		ORDER BY A.MENU_ORDER
+    </select>
+    
+<!-- 	<select id="selectParentMenus" parameterType="map" resultType="map"> -->
+<!-- 		SELECT -->
+<!-- 			MENU_SEQ, -->
+<!-- 			MENU_ID, -->
+<!-- 			MENU_NAME, -->
+<!-- 			MENU_TYPE, -->
+<!-- 			DESCRIPTION, -->
+<!-- 			MENU_URL, -->
+<!-- 			MENU_ICON, -->
+<!-- 			MENU_ORDER, -->
+<!-- 			CASE WHEN USE_YN=1 THEN true ELSE false end USE_YN, -->
+<!-- 			BBS_UID, -->
+<!-- 			PARENT_SEQ -->
+<!-- 		FROM SYS_MENU_INFO -->
+<!--   		WHERE PARENT_SEQ = 0 -->
+<!-- 		ORDER BY MENU_ORDER -->
+<!--     </select> -->
+    
+	<select id="selectChildMenus" parameterType="map" resultType="map">
+		SELECT
+			MENU_SEQ,
+			MENU_ID,
+			MENU_NAME,
+			MENU_TYPE,
+			DESCRIPTION,
+			MENU_URL,
+			MENU_ICON,
+			MENU_ORDER,
+			CASE WHEN USE_YN=1 THEN true ELSE false end USE_YN,
+			BBS_UID,
+			PARENT_SEQ
+		FROM SYS_MENU_INFO
+	   	WHERE PARENT_SEQ = cast(#{menu_seq} as integer)
+		ORDER BY MENU_ORDER
+    </select>
+    
+    <select id="retrieveParentMenu" parameterType="map" resultType="map">
+		SELECT 
+			*
+		FROM (
+			SELECT
+				MENU_SEQ,
+				MENU_ID,
+				MENU_NAME,
+				MENU_TYPE,
+				DESCRIPTION,
+				MENU_URL,
+				MENU_ICON,
+				MENU_ORDER,
+				CASE WHEN USE_YN=1 THEN true ELSE false end USE_YN,
+				BBS_UID,
+				PARENT_SEQ
+			FROM SYS_MENU_INFO
+  			WHERE PARENT_SEQ = 0
+			UNION ALL
+			SELECT 
+				0, '', 'Root', '', '', '', '', 0, true, '', -1
+		) A
+		ORDER BY MENU_SEQ
+   </select>
+   
+	<select id="selectMenusByAuth" parameterType="map" resultType="egovframework.system.vo.MenuVO">
+		SELECT 
+			A.*, B.* 
+		FROM (
+			SELECT 
+				MENU_SEQ 		AS MAIN_SEQ, 
+				MENU_ID 		AS MAIN_ID, 
+				MENU_NAME		AS MAIN_NAME,
+				MENU_TYPE		AS MAIN_TYPE,
+				MENU_URL 		AS MAIN_URL, 
+				DESCRIPTION 	AS MAIN_DESCRIPTION,
+				MENU_ORDER 	AS MAIN_ORDER, 
+<!-- 				CASE WHEN USE_YN = 1 THEN true ELSE false end MAIN_USE_YN,  -->
+				MENU_ICON 	AS MAIN_ICON
+			FROM SYS_MENU_INFO 
+	  		WHERE PARENT_SEQ = 0 AND USE_YN = 1
+	  	) A LEFT JOIN ( 
+	  		SELECT 			
+				MENU_SEQ, 
+	  			PARENT_SEQ,
+	  			MENU_ID,
+	  			MENU_NAME,
+	  			MENU_TYPE,
+				MENU_URL,
+				DESCRIPTION, 
+				MENU_ORDER, 
+				MENU_ICON,
+<!-- 				CASE WHEN USE_YN = 1 THEN true ELSE false end USE_YN, -->
+				BBS_UID
+			FROM SYS_MENU_INFO
+			WHERE USE_YN = 1
+		) B ON A.MAIN_SEQ = B.PARENT_SEQ
+		WHERE B.MENU_SEQ IN (SELECT 
+								DISTINCT(MENU_SEQ)
+							FROM SYS_AUTH
+							WHERE TARGET_ID IN (SELECT DISTINCT(A.ROLE_ID)
+												FROM (SELECT ROLE_ID
+													FROM SYS_USER_AUTHORITIES
+													WHERE USER_ID = #{user_id} 
+													UNION ALL
+													SELECT ROLE_ID
+													FROM SYS_GROUP_AUTHORITIES
+													WHERE GROUP_ID IN (SELECT GROUP_ID FROM SYS_GROUP_USER WHERE USER_ID = #{user_id}) 
+												) A 
+							)
+							AND AUTH_R = 1
+		)
+		OR A.MAIN_SEQ IN (SELECT 
+								DISTINCT(MENU_SEQ)
+							FROM SYS_AUTH
+							WHERE TARGET_ID IN (SELECT DISTINCT(A.ROLE_ID)
+												FROM (SELECT ROLE_ID
+													FROM SYS_USER_AUTHORITIES
+													WHERE USER_ID = #{user_id} 
+													UNION ALL
+													SELECT ROLE_ID
+													FROM SYS_GROUP_AUTHORITIES
+													WHERE GROUP_ID IN (SELECT GROUP_ID FROM SYS_GROUP_USER WHERE USER_ID = #{user_id}) 
+												) A 
+							)
+							AND AUTH_R = 1
+		)
+		ORDER BY MAIN_ORDER, MENU_ORDER
+   </select>
+    
+	<insert id="createMenu" >
+		INSERT INTO SYS_MENU_INFO (
+			MENU_SEQ		,
+			MENU_ID			,
+			MENU_NAME		,
+			MENU_TYPE		,
+			MENU_URL		,
+			DESCRIPTION		,
+			MENU_ICON		,
+			MENU_ORDER		,
+			USE_YN			,
+			BBS_UID			,
+			PARENT_SEQ
+		) VALUES (
+			nextval('sq_sys_menu_info'),
+			#{menu_id},
+			#{menu_name},
+			#{menu_type},
+			#{menu_url},
+			#{description},
+			#{menu_icon},
+			cast(#{menu_order} as integer),
+			CASE WHEN #{use_yn} = true THEN 1 ELSE 0 end,
+			#{bbs_uid},
+			cast(#{parent_seq} as integer)
+		) 
+	</insert>
+
+	<update id="updateMenu" >
+		UPDATE SYS_MENU_INFO 
+			SET 
+				MENU_ID			= #{menu_id},
+				MENU_NAME		= #{menu_name},
+				MENU_TYPE		= #{menu_type},
+				MENU_URL		= #{menu_url},
+				DESCRIPTION		= #{description},
+				MENU_ICON		= #{menu_icon},
+				MENU_ORDER		= cast(#{menu_order} as integer),
+				USE_YN			= CASE WHEN #{use_yn} = true THEN 1 ELSE 0 end,
+				BBS_UID			= #{bbs_uid},
+				PARENT_SEQ		= cast(#{parent_seq} as integer)
+     	WHERE MENU_SEQ = cast(#{menu_seq} as integer)
+	</update>
+	
+    <delete id="deleteMenu" >
+		DELETE FROM SYS_MENU_INFO
+		WHERE MENU_SEQ = cast(#{menu_seq} as integer)
+    </delete>
+    
+</mapper>
