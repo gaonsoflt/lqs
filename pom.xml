@@ -16,11 +16,13 @@
 		<!-- <egovframework.version>2.7.0</egovframework.version> -->
 		<springsecurity.version>3.2.4.RELEASE</springsecurity.version>
 
-
 		<!-- org.springframework.security.core.context.SecurityContextHolde에 에러가 
 			나서 3.5로 변경함 시큐리티 에러남 -->
 		<egovframework.version>3.5.0</egovframework.version>
 		<!-- <springsecurity.version>4.0.3.RELEASE</springsecurity.version> -->
+		
+		<!-- docker -->
+	    <docker.image.prefix>gaonsoft</docker.image.prefix>
 	</properties>
 
 	<repositories>
@@ -556,6 +558,23 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.5</version>
 			</plugin>
+			<!-- docker -->
+<!-- 			<plugin> -->
+<!-- 			    <groupId>com.spotify</groupId> -->
+<!-- 			    <artifactId>docker-maven-plugin</artifactId> -->
+<!-- 			    <version>0.2.3</version> -->
+<!-- 			    <configuration> -->
+<!-- 			        <imageName>${docker.image.prefix}/${project.artifactId}</imageName> -->
+<!-- 			        <dockerDirectory>src/main/docker</dockerDirectory> -->
+<!-- 			        <resources> -->
+<!-- 			            <resource> -->
+<!-- 			                <targetPath>/</targetPath> -->
+<!-- 			                <directory>${project.build.directory}</directory> -->
+<!-- 			                <include>${project.build.finalName}.jar</include> -->
+<!-- 			            </resource> -->
+<!-- 			        </resources> -->
+<!-- 			    </configuration> -->
+<!-- 			</plugin> -->
 		</plugins>
 	</build>
 	<reporting>
