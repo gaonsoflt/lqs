@@ -16,7 +16,7 @@ RUN set -ex \
 ENV TOMCAT_VERSION 7.0.81
 ENV TOMCAT_MAJOR 7
 ENV TOMCAT_TGZ_FALLBACK_URL https://archive.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz
-ENV CATALINA_HOME /var/local/tomcat$TOMCAT_MAJOR
+ENV CATALINA_HOME /usr/local/tomcat$TOMCAT_MAJOR
 ENV PATH $CATALINA_HOME/bin:$PATH
 RUN mkdir -p "$CATALINA_HOME"
 
