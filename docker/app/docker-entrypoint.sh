@@ -43,7 +43,11 @@ mv $db_file $tmp_db_file
 echo "# postgres" > $db_file
 echo "Globals.DbType=postgresql" >> $db_file
 echo "db.driver=org.postgresql.Driver" >> $db_file
-echo "db.url=jdbc:postgresql://$DB_PORT_5432_TCP_ADDR:$DB_PORT_5432_TCP_PORT/$DB_ENV_POSTGRES_DB" >> $db_file
+if [ "$DB_PORT_5432_TCP_ADDR" ]; then
+    echo "db.url=jdbc:postgresql://$DB_PORT_5432_TCP_ADDR:$DB_PORT_5432_TCP_PORT/$DB_ENV_POSTGRES_DB" >> $db_file
+else 
+    echo "db.url=jdbc:postgresql://$DB_ENV_POSTGRES_HOST:$DB_ENV_POSTGRES_PORT/$DB_ENV_POSTGRES_DB" >> $db_file
+fi
 echo "db.username=$DB_ENV_POSTGRES_USER" >> $db_file
 echo "db.password=$DB_ENV_POSTGRES_PASSWORD" >> $db_file
 
