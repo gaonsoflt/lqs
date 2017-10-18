@@ -198,7 +198,7 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>9.4.1212</version>
+			<version>9.4-1200-jdbc41</version>
 		</dependency>
 		<!-- mysql -->
 		<!-- <dependency> <groupId>mysql</groupId> <artifactId>mysql-connector-java</artifactId> 
@@ -345,6 +345,14 @@
 			<groupId>net.sf</groupId>
 			<artifactId>log4jdbc3</artifactId>
 			<version>1.1</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/javax.servlet/jsp-api -->
+		<dependency>
+		    <groupId>javax.servlet</groupId>
+		    <artifactId>jsp-api</artifactId>
+		    <version>2.0</version>
+		    <scope>provided</scope>
 		</dependency>
 
 		<!-- validation -->
@@ -559,22 +567,22 @@
 				<version>2.5</version>
 			</plugin>
 			<!-- docker -->
-<!-- 			<plugin> -->
-<!-- 			    <groupId>com.spotify</groupId> -->
-<!-- 			    <artifactId>docker-maven-plugin</artifactId> -->
-<!-- 			    <version>0.2.3</version> -->
-<!-- 			    <configuration> -->
-<!-- 			        <imageName>${docker.image.prefix}/${project.artifactId}</imageName> -->
-<!-- 			        <dockerDirectory>src/main/docker</dockerDirectory> -->
-<!-- 			        <resources> -->
-<!-- 			            <resource> -->
-<!-- 			                <targetPath>/</targetPath> -->
-<!-- 			                <directory>${project.build.directory}</directory> -->
-<!-- 			                <include>${project.build.finalName}.jar</include> -->
-<!-- 			            </resource> -->
-<!-- 			        </resources> -->
-<!-- 			    </configuration> -->
-<!-- 			</plugin> -->
+			<plugin>
+			    <groupId>com.spotify</groupId>
+			    <artifactId>docker-maven-plugin</artifactId>
+			    <version>0.2.3</version>
+			    <configuration>
+			        <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+			        <dockerDirectory>src/main/docker</dockerDirectory>
+			        <resources>
+			            <resource>
+			                <targetPath>/</targetPath>
+			                <directory>${project.build.directory}</directory>
+			                <include>${project.build.finalName}.jar</include>
+			            </resource>
+			        </resources>
+			    </configuration>
+			</plugin>
 		</plugins>
 	</build>
 	<reporting>

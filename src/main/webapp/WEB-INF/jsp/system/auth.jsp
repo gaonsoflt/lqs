@@ -207,13 +207,13 @@
 																<th>
 																	권한
 																	<p>
-																	<span class="fa fa-eye" <c:if test="${auth.auth_u eq 'true'}"> onclick="toggleAuthBtn('r')"></c:if></span> 
+																	<span class="fa fa-eye" <c:if test="${auth.auth_u eq 'true'}"> onclick="toggleAuthBtn('r')"></c:if>></span> 
 																	조회
 																</th>
-																<th><span class="fa fa-pencil" <c:if test="${auth.auth_u eq 'true'}"> onclick="toggleAuthBtn('c')"></c:if></span> 생성</th>
-																<th><span class="fa fa-wrench" <c:if test="${auth.auth_u eq 'true'}"> onclick="toggleAuthBtn('u')"></c:if></span> 수정</th>
-																<th><span class="fa fa-trash-o" <c:if test="${auth.auth_u eq 'true'}"> onclick="toggleAuthBtn('d')"></c:if></span> 삭제</th>
-																<th><span class="fa fa-print" <c:if test="${auth.auth_u eq 'true'}"> onclick="toggleAuthBtn('p')"></c:if></span> 출력</th>
+																<th><span class="fa fa-pencil" <c:if test="${auth.auth_u eq 'true'}"> onclick="toggleAuthBtn('c')"></c:if>></span> 생성</th>
+																<th><span class="fa fa-wrench" <c:if test="${auth.auth_u eq 'true'}"> onclick="toggleAuthBtn('u')"></c:if>></span> 수정</th>
+																<th><span class="fa fa-trash-o" <c:if test="${auth.auth_u eq 'true'}"> onclick="toggleAuthBtn('d')"></c:if>></span> 삭제</th>
+																<th><span class="fa fa-print" <c:if test="${auth.auth_u eq 'true'}"> onclick="toggleAuthBtn('p')"></c:if>></span> 출력</th>
 															</tr>
 														</thead>
 														<tbody data-template="menu-auth-row-template" data-bind="source: menuAuth">

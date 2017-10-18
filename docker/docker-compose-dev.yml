@@ -1,0 +1,35 @@
+version: '2.1'
+
+services:
+  db:
+    image: warluck/lqs:db-postgres1.0
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=lqs
+      - POSTGRES_USER=lqs
+      - POSTGRES_PASSWORD=lqs123qwe
+    healthcheck:
+      test: "pg_isready -h localhost -p 5432 -q -U postgres"
+      interval: 3s
+      timeout: 1s
+      retries: 10
+
+  app:
+    image: warluck/lqs:app1.0
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    links:
+      - db:db
+    volumes:
+      - ./app:/var/local
+    environment:
+      - BRANCH=dev
+      - DB_ENV_POSTGRES_HOST=db
+      - DB_ENV_POSTGRES_PORT=5432
+      - DB_ENV_POSTGRES_DB=lqs
+      - DB_ENV_POSTGRES_USER=lqs
+      - DB_ENV_POSTGRES_PASSWORD=lqs123qwe
