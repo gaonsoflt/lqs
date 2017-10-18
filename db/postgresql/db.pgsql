@@ -35,6 +35,129 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
+-- Name: api_role; Type: TABLE; Schema: public; Owner: lqs
+--
+
+CREATE TABLE api_role (
+    role_id character varying(50) NOT NULL,
+    role_name character varying(64)
+);
+
+
+ALTER TABLE api_role OWNER TO lqs;
+
+--
+-- Name: TABLE api_role; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON TABLE api_role IS 'api역할';
+
+
+--
+-- Name: COLUMN api_role.role_id; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN api_role.role_id IS '역할id';
+
+
+--
+-- Name: COLUMN api_role.role_name; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN api_role.role_name IS '역할명';
+
+
+--
+-- Name: api_user; Type: TABLE; Schema: public; Owner: lqs
+--
+
+CREATE TABLE api_user (
+    user_id character varying(32) NOT NULL,
+    user_name character varying(64),
+    password character varying(128),
+    cre_dt date,
+    user_type character varying(1)
+);
+
+
+ALTER TABLE api_user OWNER TO lqs;
+
+--
+-- Name: TABLE api_user; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON TABLE api_user IS 'api접속유저';
+
+
+--
+-- Name: COLUMN api_user.user_id; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN api_user.user_id IS 'seq';
+
+
+--
+-- Name: COLUMN api_user.user_name; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN api_user.user_name IS '유저이름';
+
+
+--
+-- Name: COLUMN api_user.password; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN api_user.password IS '패스워드';
+
+
+--
+-- Name: COLUMN api_user.cre_dt; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN api_user.cre_dt IS '등록일';
+
+
+--
+-- Name: COLUMN api_user.user_type; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN api_user.user_type IS '유저타입';
+
+
+--
+-- Name: api_user_role; Type: TABLE; Schema: public; Owner: lqs
+--
+
+CREATE TABLE api_user_role (
+    user_id character varying(32) NOT NULL,
+    role_id character varying(50) NOT NULL
+);
+
+
+ALTER TABLE api_user_role OWNER TO lqs;
+
+--
+-- Name: TABLE api_user_role; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON TABLE api_user_role IS 'api유저역할';
+
+
+--
+-- Name: COLUMN api_user_role.user_id; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN api_user_role.user_id IS '유저id';
+
+
+--
+-- Name: COLUMN api_user_role.role_id; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN api_user_role.role_id IS '역할id';
+
+
+--
 -- Name: bbs_content; Type: TABLE; Schema: public; Owner: lqs
 --
 
@@ -1848,6 +1971,41 @@ COMMENT ON COLUMN sys_user_info.cre_usr IS '등록자';
 
 
 --
+-- Data for Name: api_role; Type: TABLE DATA; Schema: public; Owner: lqs
+--
+
+COPY api_role (role_id, role_name) FROM stdin;
+ROLE_FARM	농장
+ROLE_LPR	번호인식기서버
+ROLE_KIOSK	키오스크
+\.
+
+
+--
+-- Data for Name: api_user; Type: TABLE DATA; Schema: public; Owner: lqs
+--
+
+COPY api_user (user_id, user_name, password, cre_dt, user_type) FROM stdin;
+20170002	Doll농장	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	2017-10-17	F
+20170001	가온농장	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	2017-10-17	F
+20170003	돌고래농장	fbfb386efea67e816f2dda0a8c94a98eb203757aebb3f55f183755a192d44467	2017-10-17	F
+20170005	돌고래농장	3e0a3501a65b4a7bf889c6f180cc6e35747e5aaff931cc90b760671efa09aeac	2017-10-17	F
+\.
+
+
+--
+-- Data for Name: api_user_role; Type: TABLE DATA; Schema: public; Owner: lqs
+--
+
+COPY api_user_role (user_id, role_id) FROM stdin;
+20170002	ROLE_FARM
+20170001	ROLE_FARM
+20170003	ROLE_FARM
+20170005	ROLE_FARM
+\.
+
+
+--
 -- Data for Name: bbs_content; Type: TABLE DATA; Schema: public; Owner: lqs
 --
 
@@ -1937,8 +2095,9 @@ COPY lqs_disf_facility (facility_seq, facility_name, phone, address_seq, descrip
 
 COPY lqs_farm_info (farm_seq, biz_type, reg_number, password, farm_name, owner, phone, address_seq, description, cre_dt, run_yn) FROM stdin;
 20170002	100520002	2838183838	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Doll농장	돌아이	01038384747	6	농장설명	2017-09-15	1
-20170001	100520001		a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	가온농장	김가온	010-1111-1111	3	333	2017-09-15	1
+20170001	100520001	28383438	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	가온농장	김가온	010-1111-1111	3	333	2017-09-15	1
 20170003	100520002	1290393932	fbfb386efea67e816f2dda0a8c94a98eb203757aebb3f55f183755a192d44467	돌고래농장	돌핀	01083283834	14	비고입니다	2017-09-18	1
+20170005	100520002	1290393932	3e0a3501a65b4a7bf889c6f180cc6e35747e5aaff931cc90b760671efa09aeac	돌고래농장	돌핀	01083283834	14	비고입니다	2017-09-18	1
 \.
 
 
@@ -1958,9 +2117,9 @@ COPY lqs_farm_livestock (farm_seq, ls_type, ls_count) FROM stdin;
 --
 
 COPY lqs_lpr_info (lpr_seq, model, loc_type, loc_seq, description, last_alive_dt, cre_dt, is_alive) FROM stdin;
-2	ee33333333333331-2-3-3-4-3	F	20170002	efwefwefwe34f23423ffff	\N	2017-09-19	0
 3	1111112-3-123-12-3-123	F	20170003	설명입니다.	\N	2017-09-19	0
 4	10923-234-23-423-4	L	1	거점A시설\n입니다.	\N	2017-09-19	0
+2	ee33333333333331-2-3-3-4-3	F	20170002	efwefwefwe34f23423ffff	2017-08-12 12:33:20	2017-09-19	0
 \.
 
 
@@ -1996,7 +2155,7 @@ SELECT pg_catalog.setval('sq_lqs_lpr_info', 4, true);
 -- Name: sq_sys_address; Type: SEQUENCE SET; Schema: public; Owner: lqs
 --
 
-SELECT pg_catalog.setval('sq_sys_address', 16, true);
+SELECT pg_catalog.setval('sq_sys_address', 17, true);
 
 
 --
@@ -2017,7 +2176,7 @@ SELECT pg_catalog.setval('sq_sys_group', 4, true);
 -- Name: sq_sys_login_his; Type: SEQUENCE SET; Schema: public; Owner: lqs
 --
 
-SELECT pg_catalog.setval('sq_sys_login_his', 181, true);
+SELECT pg_catalog.setval('sq_sys_login_his', 182, true);
 
 
 --
@@ -2391,6 +2550,7 @@ COPY sys_login_his (access_dt, principle, log_type, req_ip, req_device, seq) FRO
 2017-09-22 11:28:46.063252	7086ebb9-bc78-4a80-b7a1-b54509970d4f	I	0:0:0:0:0:0:0:1	unknown	179
 2017-09-22 16:59:35.218176	7086ebb9-bc78-4a80-b7a1-b54509970d4f	I	0:0:0:0:0:0:0:1	unknown	180
 2017-09-22 18:14:29.1297	7086ebb9-bc78-4a80-b7a1-b54509970d4f	I	0:0:0:0:0:0:0:1	unknown	181
+2017-10-18 11:17:22.844323	7086ebb9-bc78-4a80-b7a1-b54509970d4f	I	0:0:0:0:0:0:0:1	unknown	182
 \.
 
 
@@ -2555,6 +2715,30 @@ COPY sys_user_info (principle, user_id, password, user_name, user_type, phone, e
 
 
 --
+-- Name: api_role api_role_pk; Type: CONSTRAINT; Schema: public; Owner: lqs
+--
+
+ALTER TABLE ONLY api_role
+    ADD CONSTRAINT api_role_pk PRIMARY KEY (role_id);
+
+
+--
+-- Name: api_user api_user_pk; Type: CONSTRAINT; Schema: public; Owner: lqs
+--
+
+ALTER TABLE ONLY api_user
+    ADD CONSTRAINT api_user_pk PRIMARY KEY (user_id);
+
+
+--
+-- Name: api_user_role api_user_role_pk; Type: CONSTRAINT; Schema: public; Owner: lqs
+--
+
+ALTER TABLE ONLY api_user_role
+    ADD CONSTRAINT api_user_role_pk PRIMARY KEY (user_id, role_id);
+
+
+--
 -- Name: bbs_content bbs_content_pk; Type: CONSTRAINT; Schema: public; Owner: lqs
 --
 
@@ -2584,14 +2768,6 @@ ALTER TABLE ONLY lqs_car_disf_info
 
 ALTER TABLE ONLY lqs_car_info
     ADD CONSTRAINT lqs_car_info_pk PRIMARY KEY (car_no);
-
-
---
--- Name: lqs_farm_info lqs_farm_info_pk; Type: CONSTRAINT; Schema: public; Owner: lqs
---
-
-ALTER TABLE ONLY lqs_farm_info
-    ADD CONSTRAINT lqs_farm_info_pk PRIMARY KEY (farm_seq);
 
 
 --

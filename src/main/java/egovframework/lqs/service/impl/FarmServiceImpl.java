@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import egovframework.api.service.impl.ApiUserMapper;
+import egovframework.api.service.impl.ApiUserRoleMapper;
 import egovframework.com.vo.KendoResponseVO;
 import egovframework.common.util.PwdEncryptor;
 import egovframework.lqs.service.FarmService;
@@ -28,6 +30,12 @@ public class FarmServiceImpl implements FarmService {
 	
 	@Resource(name = "livestockMapper")
 	private LivestockMapper livestockMapper;
+	
+	@Resource(name = "apiUserMapper")
+	private ApiUserMapper apiUserMapper;
+	
+	@Resource(name = "apiUserRoleMapper")
+	private ApiUserRoleMapper apiUserRoleMapper;
 
 	@Override
 	public KendoResponseVO getFarms(Map<String, Object> map) throws Exception {
@@ -112,11 +120,41 @@ public class FarmServiceImpl implements FarmService {
 				ls.put("farm_seq", farmSeq);
 				livestockMapper.createLivestock(ls);
 			}
+			
+			// api 인증 유저 저장
+			insertApiUserInfo(map);
+			
 			// 농장정보 저장
 			return farmMapper.createFarm(map);
 		} else {
-			throw new Exception("can not create address");
+			throw new Exception("can not create farm");
 		}
+	}
+	
+	private void insertApiUserInfo(Map<String, Object> map) throws Exception {
+		// set parameter
+		map.put("user_id", map.get("farm_seq").toString());
+		map.put("user_name", map.get("farm_name").toString());
+		// TODO: remove hardcoding user_type and role_id
+		map.put("user_type", "F"); 
+		apiUserMapper.createApiUser(map);
+		
+		map.put("role_id", "ROLE_FARM");
+		apiUserRoleMapper.createApiUserRole(map);
+	}
+	
+	private void updateApiUserInfo(Map<String, Object> map) throws Exception {
+		// set parameter
+		map.put("user_id", map.get("farm_seq").toString());
+		map.put("user_name", map.get("farm_name").toString());
+		apiUserMapper.updateApiUser(map);
+	}
+	
+	private void deleteApiUserInfo(Map<String, Object> map) throws Exception {
+		// set parameter
+		map.put("user_id", map.get("farm_seq").toString());
+		apiUserMapper.deleteApiUser(map);
+		apiUserRoleMapper.deleteApiUserRole(map);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -142,6 +180,8 @@ public class FarmServiceImpl implements FarmService {
 					livestockMapper.createLivestock(ls);
 				}
 			}
+			// api 인증 유저 정보 변경
+			updateApiUserInfo(map);
 			return exeCnt;
 		} else {
 			throw new Exception("can not update farm info");
@@ -163,6 +203,7 @@ public class FarmServiceImpl implements FarmService {
 	public int deleteFarm(Map<String, Object> map) throws Exception {
 		addressMapper.deleteAddress(map);
 		livestockMapper.deleteLivestock(map);
+		deleteApiUserInfo(map);
 		return farmMapper.deleteFarm(map);
 	}
 }
