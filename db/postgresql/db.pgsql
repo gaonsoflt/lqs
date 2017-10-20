@@ -629,6 +629,71 @@ COMMENT ON COLUMN lqs_disf_facility.cre_dt IS '등록일';
 
 
 --
+-- Name: lqs_farm_access_vehicle; Type: TABLE; Schema: public; Owner: lqs
+--
+
+CREATE TABLE lqs_farm_access_vehicle (
+    car_no character varying(10) NOT NULL,
+    farm_seq integer NOT NULL,
+    cap_dt timestamp without time zone NOT NULL,
+    reject_reason character varying(500),
+    in_dt timestamp without time zone,
+    out_dt timestamp without time zone
+);
+
+
+ALTER TABLE lqs_farm_access_vehicle OWNER TO lqs;
+
+--
+-- Name: TABLE lqs_farm_access_vehicle; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON TABLE lqs_farm_access_vehicle IS '농장입출입정보';
+
+
+--
+-- Name: COLUMN lqs_farm_access_vehicle.car_no; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_farm_access_vehicle.car_no IS '차량번호';
+
+
+--
+-- Name: COLUMN lqs_farm_access_vehicle.farm_seq; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_farm_access_vehicle.farm_seq IS 'seq(앱id)';
+
+
+--
+-- Name: COLUMN lqs_farm_access_vehicle.cap_dt; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_farm_access_vehicle.cap_dt IS '번호인식시간';
+
+
+--
+-- Name: COLUMN lqs_farm_access_vehicle.reject_reason; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_farm_access_vehicle.reject_reason IS '미출입사유';
+
+
+--
+-- Name: COLUMN lqs_farm_access_vehicle.in_dt; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_farm_access_vehicle.in_dt IS '입차시간';
+
+
+--
+-- Name: COLUMN lqs_farm_access_vehicle.out_dt; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_farm_access_vehicle.out_dt IS '출차시간';
+
+
+--
 -- Name: lqs_farm_info; Type: TABLE; Schema: public; Owner: lqs
 --
 
@@ -784,9 +849,7 @@ CREATE TABLE lqs_lpr_info (
     loc_type character varying(50),
     loc_seq integer,
     description character varying(500),
-    last_alive_dt timestamp without time zone,
-    cre_dt date,
-    is_alive smallint DEFAULT 0
+    cre_dt date
 );
 
 
@@ -835,13 +898,6 @@ COMMENT ON COLUMN lqs_lpr_info.description IS '설명';
 
 
 --
--- Name: COLUMN lqs_lpr_info.last_alive_dt; Type: COMMENT; Schema: public; Owner: lqs
---
-
-COMMENT ON COLUMN lqs_lpr_info.last_alive_dt IS '최종체크일';
-
-
---
 -- Name: COLUMN lqs_lpr_info.cre_dt; Type: COMMENT; Schema: public; Owner: lqs
 --
 
@@ -849,10 +905,52 @@ COMMENT ON COLUMN lqs_lpr_info.cre_dt IS '등록일';
 
 
 --
--- Name: COLUMN lqs_lpr_info.is_alive; Type: COMMENT; Schema: public; Owner: lqs
+-- Name: lqs_lpr_status; Type: TABLE; Schema: public; Owner: lqs
 --
 
-COMMENT ON COLUMN lqs_lpr_info.is_alive IS '연결상태';
+CREATE TABLE lqs_lpr_status (
+    lpr_seq integer NOT NULL,
+    is_alive integer DEFAULT 0,
+    status_msg character varying(255),
+    cre_dt timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE lqs_lpr_status OWNER TO lqs;
+
+--
+-- Name: TABLE lqs_lpr_status; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON TABLE lqs_lpr_status IS '번호인식기상태정보';
+
+
+--
+-- Name: COLUMN lqs_lpr_status.lpr_seq; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_lpr_status.lpr_seq IS 'seq';
+
+
+--
+-- Name: COLUMN lqs_lpr_status.is_alive; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_lpr_status.is_alive IS '0:정상, 1:오류';
+
+
+--
+-- Name: COLUMN lqs_lpr_status.status_msg; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_lpr_status.status_msg IS '상태메시지';
+
+
+--
+-- Name: COLUMN lqs_lpr_status.cre_dt; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_lpr_status.cre_dt IS '등록일';
 
 
 --
@@ -2090,6 +2188,18 @@ COPY lqs_disf_facility (facility_seq, facility_name, phone, address_seq, descrip
 
 
 --
+-- Data for Name: lqs_farm_access_vehicle; Type: TABLE DATA; Schema: public; Owner: lqs
+--
+
+COPY lqs_farm_access_vehicle (car_no, farm_seq, cap_dt, reject_reason, in_dt, out_dt) FROM stdin;
+30어2304	20170002	2017-10-18 11:45:33	\N	2017-10-19 11:45:35	\N
+30어2304	20170005	2017-10-18 11:45:33	\N	2017-10-18 11:45:35	\N
+12가3942	20170005	2017-10-19 11:45:33	\N	2017-10-19 11:45:35	\N
+12가3942	20170005	2017-10-19 11:40:33	\N	2017-10-19 11:40:35	\N
+\.
+
+
+--
 -- Data for Name: lqs_farm_info; Type: TABLE DATA; Schema: public; Owner: lqs
 --
 
@@ -2116,10 +2226,23 @@ COPY lqs_farm_livestock (farm_seq, ls_type, ls_count) FROM stdin;
 -- Data for Name: lqs_lpr_info; Type: TABLE DATA; Schema: public; Owner: lqs
 --
 
-COPY lqs_lpr_info (lpr_seq, model, loc_type, loc_seq, description, last_alive_dt, cre_dt, is_alive) FROM stdin;
-3	1111112-3-123-12-3-123	F	20170003	설명입니다.	\N	2017-09-19	0
-4	10923-234-23-423-4	L	1	거점A시설\n입니다.	\N	2017-09-19	0
-2	ee33333333333331-2-3-3-4-3	F	20170002	efwefwefwe34f23423ffff	2017-08-12 12:33:20	2017-09-19	0
+COPY lqs_lpr_info (lpr_seq, model, loc_type, loc_seq, description, cre_dt) FROM stdin;
+3	1111112-3-123-12-3-123	F	20170003	설명입니다.	2017-09-19
+4	10923-234-23-423-4	L	1	거점A시설\n입니다.	2017-09-19
+2	ee33333333333331-2-3-3-4-3	F	20170005	efwefwefwe34f23423ffff	2017-09-19
+\.
+
+
+--
+-- Data for Name: lqs_lpr_status; Type: TABLE DATA; Schema: public; Owner: lqs
+--
+
+COPY lqs_lpr_status (lpr_seq, is_alive, status_msg, cre_dt) FROM stdin;
+3	0	string	2017-10-20 10:31:02
+2	0	disconnected	2017-10-19 11:45:33
+2	1	\N	2017-10-19 11:45:35
+2	1	\N	2017-10-20 10:30:02.949
+2	1	\N	2017-10-20 10:35:02
 \.
 
 
@@ -2176,7 +2299,7 @@ SELECT pg_catalog.setval('sq_sys_group', 4, true);
 -- Name: sq_sys_login_his; Type: SEQUENCE SET; Schema: public; Owner: lqs
 --
 
-SELECT pg_catalog.setval('sq_sys_login_his', 182, true);
+SELECT pg_catalog.setval('sq_sys_login_his', 184, true);
 
 
 --
@@ -2337,6 +2460,7 @@ COPY sys_code_master (cd, catgr, cd_nm, cd_id, sort_no, use_yn, cre_usr, cre_dt,
 COPY sys_config (cfg_group, cfg_id, cfg_name, cfg_value, use_yn, description) FROM stdin;
 SYSTEM	LOGO	로고	/resource/images/logo/logo.png	1	메인 로고이미지
 SYSTEM	TITLE	타이틀	축산방역시스템	1	하동축산방역시스템
+SYSTEM	APP_ADM_TEL	앱관리자연락처	055-112-0119	1	앱관리자연락처
 \.
 
 
@@ -2551,6 +2675,8 @@ COPY sys_login_his (access_dt, principle, log_type, req_ip, req_device, seq) FRO
 2017-09-22 16:59:35.218176	7086ebb9-bc78-4a80-b7a1-b54509970d4f	I	0:0:0:0:0:0:0:1	unknown	180
 2017-09-22 18:14:29.1297	7086ebb9-bc78-4a80-b7a1-b54509970d4f	I	0:0:0:0:0:0:0:1	unknown	181
 2017-10-18 11:17:22.844323	7086ebb9-bc78-4a80-b7a1-b54509970d4f	I	0:0:0:0:0:0:0:1	unknown	182
+2017-10-20 11:02:33.323786	7086ebb9-bc78-4a80-b7a1-b54509970d4f	I	0:0:0:0:0:0:0:1	unknown	183
+2017-10-20 11:22:36.10133	7086ebb9-bc78-4a80-b7a1-b54509970d4f	I	0:0:0:0:0:0:0:1	unknown	184
 \.
 
 
@@ -2771,6 +2897,14 @@ ALTER TABLE ONLY lqs_car_info
 
 
 --
+-- Name: lqs_farm_access_vehicle lqs_farm_access_vehicle_pk; Type: CONSTRAINT; Schema: public; Owner: lqs
+--
+
+ALTER TABLE ONLY lqs_farm_access_vehicle
+    ADD CONSTRAINT lqs_farm_access_vehicle_pk PRIMARY KEY (car_no, farm_seq, cap_dt);
+
+
+--
 -- Name: lqs_farm_livestock lqs_farm_livestock_pk; Type: CONSTRAINT; Schema: public; Owner: lqs
 --
 
@@ -2784,6 +2918,14 @@ ALTER TABLE ONLY lqs_farm_livestock
 
 ALTER TABLE ONLY lqs_lpr_info
     ADD CONSTRAINT lqs_lpr_info_pk PRIMARY KEY (lpr_seq);
+
+
+--
+-- Name: lqs_lpr_status lqs_lpr_status_pk; Type: CONSTRAINT; Schema: public; Owner: lqs
+--
+
+ALTER TABLE ONLY lqs_lpr_status
+    ADD CONSTRAINT lqs_lpr_status_pk PRIMARY KEY (lpr_seq, cre_dt);
 
 
 --
