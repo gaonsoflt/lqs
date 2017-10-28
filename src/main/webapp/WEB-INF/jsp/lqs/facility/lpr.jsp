@@ -124,6 +124,15 @@
 														</td>
 													</tr>
 													<tr>
+														<th><label class="col-lg-12 control-label">상태메시지</label></th>
+														<td>
+															<input data-role="maskedtextbox"
+																	data-bind="value:selected.status_msg,
+																				enabled: isFalse"
+																	style="width:100%;background:#EEE;"/>
+														</td>
+													</tr>
+													<tr>
 														<th><label class="col-lg-12 control-label">최종확인일시</label></th>
 														<td>
 															<input data-role="datetimepicker"
