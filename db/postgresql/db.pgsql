@@ -402,6 +402,47 @@ COMMENT ON COLUMN bbs_reply.parent_seq IS '상위seq';
 
 
 --
+-- Name: lqs_app_fcm; Type: TABLE; Schema: public; Owner: lqs
+--
+
+CREATE TABLE lqs_app_fcm (
+    token character varying(255) NOT NULL,
+    app_id integer,
+    allow_alert integer DEFAULT 1
+);
+
+
+ALTER TABLE lqs_app_fcm OWNER TO lqs;
+
+--
+-- Name: TABLE lqs_app_fcm; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON TABLE lqs_app_fcm IS '앱푸시정보';
+
+
+--
+-- Name: COLUMN lqs_app_fcm.token; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_app_fcm.token IS '토큰';
+
+
+--
+-- Name: COLUMN lqs_app_fcm.app_id; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_app_fcm.app_id IS 'seq(앱id)';
+
+
+--
+-- Name: COLUMN lqs_app_fcm.allow_alert; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_app_fcm.allow_alert IS '알람허용여부';
+
+
+--
 -- Name: lqs_car_disf_info; Type: TABLE; Schema: public; Owner: lqs
 --
 
@@ -409,7 +450,8 @@ CREATE TABLE lqs_car_disf_info (
     car_no character varying(10) NOT NULL,
     facility_seq integer NOT NULL,
     disf_dt timestamp without time zone NOT NULL,
-    admit_dt timestamp without time zone NOT NULL
+    admit_dt timestamp without time zone NOT NULL,
+    car_disf_seq integer NOT NULL
 );
 
 
@@ -448,6 +490,13 @@ COMMENT ON COLUMN lqs_car_disf_info.disf_dt IS '소독일시';
 --
 
 COMMENT ON COLUMN lqs_car_disf_info.admit_dt IS '출입허용시간';
+
+
+--
+-- Name: COLUMN lqs_car_disf_info.car_disf_seq; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_car_disf_info.car_disf_seq IS '소독SEQ';
 
 
 --
@@ -564,6 +613,55 @@ COMMENT ON COLUMN lqs_car_info.cre_dt IS '등록일';
 
 
 --
+-- Name: lqs_disease_warn_stage; Type: TABLE; Schema: public; Owner: lqs
+--
+
+CREATE TABLE lqs_disease_warn_stage (
+    seq integer NOT NULL,
+    disease_code character varying(50) NOT NULL,
+    stage integer NOT NULL,
+    cre_dt timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE lqs_disease_warn_stage OWNER TO lqs;
+
+--
+-- Name: TABLE lqs_disease_warn_stage; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON TABLE lqs_disease_warn_stage IS '질병위기경보단계';
+
+
+--
+-- Name: COLUMN lqs_disease_warn_stage.seq; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_disease_warn_stage.seq IS 'seq';
+
+
+--
+-- Name: COLUMN lqs_disease_warn_stage.disease_code; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_disease_warn_stage.disease_code IS '질병코드';
+
+
+--
+-- Name: COLUMN lqs_disease_warn_stage.stage; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_disease_warn_stage.stage IS '1:관심,2:주의,3:경계,4:심각';
+
+
+--
+-- Name: COLUMN lqs_disease_warn_stage.cre_dt; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_disease_warn_stage.cre_dt IS '등록일';
+
+
+--
 -- Name: lqs_disf_facility; Type: TABLE; Schema: public; Owner: lqs
 --
 
@@ -629,16 +727,101 @@ COMMENT ON COLUMN lqs_disf_facility.cre_dt IS '등록일';
 
 
 --
+-- Name: lqs_driver_info; Type: TABLE; Schema: public; Owner: lqs
+--
+
+CREATE TABLE lqs_driver_info (
+    driver_seq integer NOT NULL,
+    driver_name character varying(64),
+    gender integer,
+    age integer,
+    phone character varying(16),
+    company character varying(50),
+    fingerprint bytea,
+    cre_dt date
+);
+
+
+ALTER TABLE lqs_driver_info OWNER TO lqs;
+
+--
+-- Name: TABLE lqs_driver_info; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON TABLE lqs_driver_info IS '차량운전자정';
+
+
+--
+-- Name: COLUMN lqs_driver_info.driver_seq; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_driver_info.driver_seq IS '운전자seq';
+
+
+--
+-- Name: COLUMN lqs_driver_info.driver_name; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_driver_info.driver_name IS '운전자명';
+
+
+--
+-- Name: COLUMN lqs_driver_info.gender; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_driver_info.gender IS '성별';
+
+
+--
+-- Name: COLUMN lqs_driver_info.age; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_driver_info.age IS '나이';
+
+
+--
+-- Name: COLUMN lqs_driver_info.phone; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_driver_info.phone IS '연락처';
+
+
+--
+-- Name: COLUMN lqs_driver_info.company; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_driver_info.company IS '소속';
+
+
+--
+-- Name: COLUMN lqs_driver_info.fingerprint; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_driver_info.fingerprint IS '지문';
+
+
+--
+-- Name: COLUMN lqs_driver_info.cre_dt; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_driver_info.cre_dt IS '등록일';
+
+
+--
 -- Name: lqs_farm_access_vehicle; Type: TABLE; Schema: public; Owner: lqs
 --
 
 CREATE TABLE lqs_farm_access_vehicle (
     car_no character varying(10) NOT NULL,
     farm_seq integer NOT NULL,
-    cap_dt timestamp without time zone NOT NULL,
+    cap_dt timestamp without time zone,
     reject_reason character varying(500),
     in_dt timestamp without time zone,
-    out_dt timestamp without time zone
+    out_dt timestamp without time zone,
+    driver_seq integer,
+    visit_plan_dt date,
+    seq integer NOT NULL,
+    car_disf_seq integer
 );
 
 
@@ -694,6 +877,99 @@ COMMENT ON COLUMN lqs_farm_access_vehicle.out_dt IS '출차시간';
 
 
 --
+-- Name: COLUMN lqs_farm_access_vehicle.driver_seq; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_farm_access_vehicle.driver_seq IS '운전자SEQ';
+
+
+--
+-- Name: COLUMN lqs_farm_access_vehicle.visit_plan_dt; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_farm_access_vehicle.visit_plan_dt IS '방문예정일';
+
+
+--
+-- Name: COLUMN lqs_farm_access_vehicle.seq; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_farm_access_vehicle.seq IS 'SEQ';
+
+
+--
+-- Name: COLUMN lqs_farm_access_vehicle.car_disf_seq; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_farm_access_vehicle.car_disf_seq IS '차량소독SEQ';
+
+
+--
+-- Name: lqs_farm_disease; Type: TABLE; Schema: public; Owner: lqs
+--
+
+CREATE TABLE lqs_farm_disease (
+    farm_seq integer NOT NULL,
+    disease_code character varying(50),
+    diagnosis_agy character varying(50),
+    occ_dt timestamp without time zone,
+    ter_dt timestamp without time zone,
+    seq integer NOT NULL
+);
+
+
+ALTER TABLE lqs_farm_disease OWNER TO lqs;
+
+--
+-- Name: TABLE lqs_farm_disease; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON TABLE lqs_farm_disease IS '농장질병정보';
+
+
+--
+-- Name: COLUMN lqs_farm_disease.farm_seq; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_farm_disease.farm_seq IS 'seq(앱id)';
+
+
+--
+-- Name: COLUMN lqs_farm_disease.disease_code; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_farm_disease.disease_code IS '질병종류';
+
+
+--
+-- Name: COLUMN lqs_farm_disease.diagnosis_agy; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_farm_disease.diagnosis_agy IS '진단기관';
+
+
+--
+-- Name: COLUMN lqs_farm_disease.occ_dt; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_farm_disease.occ_dt IS '발생일';
+
+
+--
+-- Name: COLUMN lqs_farm_disease.ter_dt; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_farm_disease.ter_dt IS '해제일';
+
+
+--
+-- Name: COLUMN lqs_farm_disease.seq; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_farm_disease.seq IS 'SEQ';
+
+
+--
 -- Name: lqs_farm_info; Type: TABLE; Schema: public; Owner: lqs
 --
 
@@ -701,7 +977,6 @@ CREATE TABLE lqs_farm_info (
     farm_seq integer NOT NULL,
     biz_type character varying(50),
     reg_number character varying(50),
-    password character varying(128),
     farm_name character varying(64),
     owner character varying(64),
     phone character varying(16),
@@ -740,13 +1015,6 @@ COMMENT ON COLUMN lqs_farm_info.biz_type IS '기업유형';
 --
 
 COMMENT ON COLUMN lqs_farm_info.reg_number IS '등록번호';
-
-
---
--- Name: COLUMN lqs_farm_info.password; Type: COMMENT; Schema: public; Owner: lqs
---
-
-COMMENT ON COLUMN lqs_farm_info.password IS '앱패스워드';
 
 
 --
@@ -954,6 +1222,39 @@ COMMENT ON COLUMN lqs_lpr_status.cre_dt IS '등록일';
 
 
 --
+-- Name: lqs_meta_disease; Type: TABLE; Schema: public; Owner: lqs
+--
+
+CREATE TABLE lqs_meta_disease (
+    disease_code character varying(50) NOT NULL,
+    disease_name character varying(64)
+);
+
+
+ALTER TABLE lqs_meta_disease OWNER TO lqs;
+
+--
+-- Name: TABLE lqs_meta_disease; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON TABLE lqs_meta_disease IS '질병정보';
+
+
+--
+-- Name: COLUMN lqs_meta_disease.disease_code; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_meta_disease.disease_code IS '질병코드';
+
+
+--
+-- Name: COLUMN lqs_meta_disease.disease_name; Type: COMMENT; Schema: public; Owner: lqs
+--
+
+COMMENT ON COLUMN lqs_meta_disease.disease_name IS '질병명';
+
+
+--
 -- Name: sq_bbs_file; Type: SEQUENCE; Schema: public; Owner: lqs
 --
 
@@ -982,6 +1283,34 @@ CREATE SEQUENCE sq_bbs_reply
 ALTER TABLE sq_bbs_reply OWNER TO lqs;
 
 --
+-- Name: sq_lqs_car_disf_info; Type: SEQUENCE; Schema: public; Owner: lqs
+--
+
+CREATE SEQUENCE sq_lqs_car_disf_info
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE sq_lqs_car_disf_info OWNER TO lqs;
+
+--
+-- Name: sq_lqs_disease_warn_stage; Type: SEQUENCE; Schema: public; Owner: lqs
+--
+
+CREATE SEQUENCE sq_lqs_disease_warn_stage
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE sq_lqs_disease_warn_stage OWNER TO lqs;
+
+--
 -- Name: sq_lqs_disf_facility; Type: SEQUENCE; Schema: public; Owner: lqs
 --
 
@@ -994,6 +1323,48 @@ CREATE SEQUENCE sq_lqs_disf_facility
 
 
 ALTER TABLE sq_lqs_disf_facility OWNER TO lqs;
+
+--
+-- Name: sq_lqs_driver_info; Type: SEQUENCE; Schema: public; Owner: lqs
+--
+
+CREATE SEQUENCE sq_lqs_driver_info
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE sq_lqs_driver_info OWNER TO lqs;
+
+--
+-- Name: sq_lqs_farm_access_vehicle; Type: SEQUENCE; Schema: public; Owner: lqs
+--
+
+CREATE SEQUENCE sq_lqs_farm_access_vehicle
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE sq_lqs_farm_access_vehicle OWNER TO lqs;
+
+--
+-- Name: sq_lqs_farm_disease; Type: SEQUENCE; Schema: public; Owner: lqs
+--
+
+CREATE SEQUENCE sq_lqs_farm_disease
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE sq_lqs_farm_disease OWNER TO lqs;
 
 --
 -- Name: sq_lqs_lpr_info; Type: SEQUENCE; Schema: public; Owner: lqs
@@ -2073,9 +2444,9 @@ COMMENT ON COLUMN sys_user_info.cre_usr IS '등록자';
 --
 
 COPY api_role (role_id, role_name) FROM stdin;
-ROLE_FARM	농장
 ROLE_LPR	번호인식기서버
 ROLE_KIOSK	키오스크
+ROLE_FARM	농장
 \.
 
 
@@ -2086,7 +2457,7 @@ ROLE_KIOSK	키오스크
 COPY api_user (user_id, user_name, password, cre_dt, user_type) FROM stdin;
 20170002	Doll농장	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	2017-10-17	F
 20170001	가온농장	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	2017-10-17	F
-20170003	돌고래농장	fbfb386efea67e816f2dda0a8c94a98eb203757aebb3f55f183755a192d44467	2017-10-17	F
+20170003	돌고래농장	3e0a3501a65b4a7bf889c6f180cc6e35747e5aaff931cc90b760671efa09aeac	2017-10-17	F
 20170005	돌고래농장	3e0a3501a65b4a7bf889c6f180cc6e35747e5aaff931cc90b760671efa09aeac	2017-10-17	F
 \.
 
@@ -2148,21 +2519,39 @@ COPY bbs_reply (reply_seq, bbs_uid, content_seq, reply, cre_usr, cre_dt, mod_dt,
 
 
 --
+-- Data for Name: lqs_app_fcm; Type: TABLE DATA; Schema: public; Owner: lqs
+--
+
+COPY lqs_app_fcm (token, app_id, allow_alert) FROM stdin;
+123qwe1123	20170003	1
+1231qwe1123	20170003	1
+12313qw123	20170003	1
+123qwe123	20170005	1
+1231qw123	20170005	1
+\.
+
+
+--
 -- Data for Name: lqs_car_disf_info; Type: TABLE DATA; Schema: public; Owner: lqs
 --
 
-COPY lqs_car_disf_info (car_no, facility_seq, disf_dt, admit_dt) FROM stdin;
-22가2222	1	2017-09-22 12:22:22	2017-09-22 17:22:22
-12가3942	1	2017-09-21 12:22:22	2017-09-21 17:22:22
-30가3333	2	2017-09-22 17:00:38.709	2017-09-22 22:00:38.709
-30가3333	2	2017-09-22 17:01:56.41	2017-09-22 22:01:56.41
-30가3333	2	2017-09-22 17:02:54.275	2017-09-22 22:02:54.275
-30가3333	2	2017-09-22 17:02:57.07	2017-09-22 22:02:57.07
-30가3333	2	2017-09-22 17:03:01.13	2017-09-22 22:03:01.13
-30가3333	2	2017-09-22 17:03:06.814	2017-09-22 22:03:06.814
-30가3333	2	2017-09-22 17:03:54.727	2017-09-22 22:03:54.727
-30가3333	2	2017-09-22 17:07:23.122	2017-09-22 22:07:23.122
-30가3333	2	2017-09-22 17:08:13.599	2017-09-22 22:08:13.599
+COPY lqs_car_disf_info (car_no, facility_seq, disf_dt, admit_dt, car_disf_seq) FROM stdin;
+30가3333	2	2017-09-22 17:00:38.709	2017-09-22 22:00:38.709	9
+30가3333	2	2017-09-22 17:01:56.41	2017-09-22 22:01:56.41	99
+30가3333	2	2017-09-22 17:02:54.275	2017-09-22 22:02:54.275	999
+30가3333	2	2017-09-22 17:02:57.07	2017-09-22 22:02:57.07	9999
+30가3333	2	2017-09-22 17:03:01.13	2017-09-22 22:03:01.13	999999
+30가3333	2	2017-09-22 17:03:06.814	2017-09-22 22:03:06.814	9997
+30가3333	2	2017-09-22 17:03:54.727	2017-09-22 22:03:54.727	8678678
+30가3333	2	2017-09-22 17:07:23.122	2017-09-22 22:07:23.122	77867
+30가3333	2	2017-09-22 17:08:13.599	2017-09-22 22:08:13.599	67867
+12가3942	1	2017-09-21 12:22:22	2017-10-23 17:22:22	6786786
+22가2222	1	2017-09-22 12:22:22	2017-10-23 15:28:52	678678
+12가3942	1	2017-10-24 15:03:51.136	2017-10-24 20:03:51.136	786786
+30가1234	1	2017-10-25 21:51:19.218	2017-10-26 02:51:19.218	3
+30가1234	1	2017-10-25 11:51:19.218	2017-10-22 16:51:19	1
+30가1234	1	2017-10-22 11:51:19	2017-10-23 16:51:19	2
+30가1234	1	2017-10-25 21:51:19.218	2017-10-25 02:51:19	4
 \.
 
 
@@ -2174,6 +2563,20 @@ COPY lqs_car_info (car_no, owner, type, model, maker, since_year, fuel_type, com
 20가1293	김개똥	100531001	df2ef23f	현대	201701	G	\N	100520001	vdfververㄹㄹㄹㄹ	\N	2017-11-02
 30어2304	이말자	100531001	a0303	르노삼성	201704	E		100520001	ffff		2017-09-21
 12가3942	가온소프트	100531002	23-42-34-7	폭스바겐	201003	D		100520002	fff		2017-09-21
+33가2334	우리농장	100531002	34904ㅅ3	폭스바겐	201003	D		100520002	fff		2017-09-21
+55가2332	미등록차량	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+\.
+
+
+--
+-- Data for Name: lqs_disease_warn_stage; Type: TABLE DATA; Schema: public; Owner: lqs
+--
+
+COPY lqs_disease_warn_stage (seq, disease_code, stage, cre_dt) FROM stdin;
+99	1	1	2017-10-26 20:22:38
+101	2	4	2017-10-27 05:03:01
+98	2	3	2017-10-25 05:03:01
+100	1	2	2017-10-27 10:22:11
 \.
 
 
@@ -2188,14 +2591,45 @@ COPY lqs_disf_facility (facility_seq, facility_name, phone, address_seq, descrip
 
 
 --
+-- Data for Name: lqs_driver_info; Type: TABLE DATA; Schema: public; Owner: lqs
+--
+
+COPY lqs_driver_info (driver_seq, driver_name, gender, age, phone, company, fingerprint, cre_dt) FROM stdin;
+1001	개똥이당	\N	\N	\N	\N	\N	\N
+3	소똥이당	\N	\N	\N	\N	\N	\N
+\.
+
+
+--
 -- Data for Name: lqs_farm_access_vehicle; Type: TABLE DATA; Schema: public; Owner: lqs
 --
 
-COPY lqs_farm_access_vehicle (car_no, farm_seq, cap_dt, reject_reason, in_dt, out_dt) FROM stdin;
-30어2304	20170002	2017-10-18 11:45:33	\N	2017-10-19 11:45:35	\N
-30어2304	20170005	2017-10-18 11:45:33	\N	2017-10-18 11:45:35	\N
-12가3942	20170005	2017-10-19 11:45:33	\N	2017-10-19 11:45:35	\N
-12가3942	20170005	2017-10-19 11:40:33	\N	2017-10-19 11:40:35	\N
+COPY lqs_farm_access_vehicle (car_no, farm_seq, cap_dt, reject_reason, in_dt, out_dt, driver_seq, visit_plan_dt, seq, car_disf_seq) FROM stdin;
+30어2304	20170002	2017-10-18 11:45:33	\N	2017-10-19 11:45:35	\N	\N	\N	44	\N
+30어2304	20170005	2017-10-18 11:45:33	\N	2017-10-18 11:45:35	\N	\N	\N	535	\N
+12가3942	20170005	2017-10-19 11:45:33	\N	2017-10-19 11:45:35	\N	\N	\N	552345	\N
+12가3942	20170005	2017-10-24 15:03:51.136	\N	2017-10-24 20:05:51.136	\N	\N	\N	2454	\N
+20가1293	20170005	2017-10-19 11:40:33	\N	2017-10-19 11:40:35	\N	\N	\N	524524	\N
+33가2334	1	\N	\N	\N	\N	3	2017-10-25	1	\N
+33가2334	9	\N	\N	\N	\N	3	2017-10-25	3	\N
+33가2334	20170002	\N	\N	\N	\N	3	2017-10-25	6	1
+33가2334	20170005	2017-10-25 21:51:19.218	\N	\N	\N	3	2017-10-25	5	1
+33가2334	20170005	2017-10-25 21:52:19	\N	\N	\N	\N	\N	8	\N
+11가2334	20170005	2017-10-25 21:55:19	\N	2017-10-25 21:55:19.218	\N	\N	\N	9	\N
+55가2332	20170005	2017-10-25 21:51:19.218	\N	2017-10-25 21:55:19.218	\N	\N	\N	10	\N
+33가2334	20170005	\N	\N	\N	\N	3	2017-10-26	4	1
+33가2334	20170005	\N	\N	\N	\N	3	2017-10-24	2	\N
+\.
+
+
+--
+-- Data for Name: lqs_farm_disease; Type: TABLE DATA; Schema: public; Owner: lqs
+--
+
+COPY lqs_farm_disease (farm_seq, disease_code, diagnosis_agy, occ_dt, ter_dt, seq) FROM stdin;
+20170005	2	\N	2017-10-25 19:11:31.362	\N	5
+20170005	1	\N	2017-10-26 19:11:31.362	2017-10-27 19:11:31	3
+20170005	2	\N	2017-10-25 19:11:31.362	2017-10-26 19:49:17.37	4
 \.
 
 
@@ -2203,11 +2637,11 @@ COPY lqs_farm_access_vehicle (car_no, farm_seq, cap_dt, reject_reason, in_dt, ou
 -- Data for Name: lqs_farm_info; Type: TABLE DATA; Schema: public; Owner: lqs
 --
 
-COPY lqs_farm_info (farm_seq, biz_type, reg_number, password, farm_name, owner, phone, address_seq, description, cre_dt, run_yn) FROM stdin;
-20170002	100520002	2838183838	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	Doll농장	돌아이	01038384747	6	농장설명	2017-09-15	1
-20170001	100520001	28383438	a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3	가온농장	김가온	010-1111-1111	3	333	2017-09-15	1
-20170003	100520002	1290393932	fbfb386efea67e816f2dda0a8c94a98eb203757aebb3f55f183755a192d44467	돌고래농장	돌핀	01083283834	14	비고입니다	2017-09-18	1
-20170005	100520002	1290393932	3e0a3501a65b4a7bf889c6f180cc6e35747e5aaff931cc90b760671efa09aeac	돌고래농장	돌핀	01083283834	14	비고입니다	2017-09-18	1
+COPY lqs_farm_info (farm_seq, biz_type, reg_number, farm_name, owner, phone, address_seq, description, cre_dt, run_yn) FROM stdin;
+20170002	100520002	2838183838	Doll농장	돌아이	01038384747	6	농장설명	2017-09-15	1
+20170001	100520001	28383438	가온농장	김가온	010-1111-1111	3	333	2017-09-15	1
+20170005	100520002	1290393932	돌고래농장	돌핀	01083283834	16	비고입니다	2017-09-18	1
+20170003	100520002	1290393932	돌고래농장	돌핀	01083283834	15	비고입니다	2017-09-18	1
 \.
 
 
@@ -2247,6 +2681,19 @@ COPY lqs_lpr_status (lpr_seq, is_alive, status_msg, cre_dt) FROM stdin;
 
 
 --
+-- Data for Name: lqs_meta_disease; Type: TABLE DATA; Schema: public; Owner: lqs
+--
+
+COPY lqs_meta_disease (disease_code, disease_name) FROM stdin;
+1	콜레라
+2	AI
+3	정신병
+4	광우병
+5	맥주병
+\.
+
+
+--
 -- Name: sq_bbs_file; Type: SEQUENCE SET; Schema: public; Owner: lqs
 --
 
@@ -2261,10 +2708,45 @@ SELECT pg_catalog.setval('sq_bbs_reply', 26, true);
 
 
 --
+-- Name: sq_lqs_car_disf_info; Type: SEQUENCE SET; Schema: public; Owner: lqs
+--
+
+SELECT pg_catalog.setval('sq_lqs_car_disf_info', 4, true);
+
+
+--
+-- Name: sq_lqs_disease_warn_stage; Type: SEQUENCE SET; Schema: public; Owner: lqs
+--
+
+SELECT pg_catalog.setval('sq_lqs_disease_warn_stage', 1, false);
+
+
+--
 -- Name: sq_lqs_disf_facility; Type: SEQUENCE SET; Schema: public; Owner: lqs
 --
 
 SELECT pg_catalog.setval('sq_lqs_disf_facility', 2, true);
+
+
+--
+-- Name: sq_lqs_driver_info; Type: SEQUENCE SET; Schema: public; Owner: lqs
+--
+
+SELECT pg_catalog.setval('sq_lqs_driver_info', 1, false);
+
+
+--
+-- Name: sq_lqs_farm_access_vehicle; Type: SEQUENCE SET; Schema: public; Owner: lqs
+--
+
+SELECT pg_catalog.setval('sq_lqs_farm_access_vehicle', 10, true);
+
+
+--
+-- Name: sq_lqs_farm_disease; Type: SEQUENCE SET; Schema: public; Owner: lqs
+--
+
+SELECT pg_catalog.setval('sq_lqs_farm_disease', 5, true);
 
 
 --
@@ -2461,6 +2943,7 @@ COPY sys_config (cfg_group, cfg_id, cfg_name, cfg_value, use_yn, description) FR
 SYSTEM	LOGO	로고	/resource/images/logo/logo.png	1	메인 로고이미지
 SYSTEM	TITLE	타이틀	축산방역시스템	1	하동축산방역시스템
 SYSTEM	APP_ADM_TEL	앱관리자연락처	055-112-0119	1	앱관리자연락처
+LQS	DISF_ADMIT_TIME	소독허용시간	300	1	소독허용시간(min)
 \.
 
 
@@ -2881,11 +3364,19 @@ ALTER TABLE ONLY bbs_reply
 
 
 --
+-- Name: lqs_app_fcm lqs_app_fcm_pk; Type: CONSTRAINT; Schema: public; Owner: lqs
+--
+
+ALTER TABLE ONLY lqs_app_fcm
+    ADD CONSTRAINT lqs_app_fcm_pk PRIMARY KEY (token);
+
+
+--
 -- Name: lqs_car_disf_info lqs_car_disf_info_pk; Type: CONSTRAINT; Schema: public; Owner: lqs
 --
 
 ALTER TABLE ONLY lqs_car_disf_info
-    ADD CONSTRAINT lqs_car_disf_info_pk PRIMARY KEY (car_no, facility_seq, disf_dt);
+    ADD CONSTRAINT lqs_car_disf_info_pk PRIMARY KEY (car_disf_seq);
 
 
 --
@@ -2897,11 +3388,43 @@ ALTER TABLE ONLY lqs_car_info
 
 
 --
+-- Name: lqs_disease_warn_stage lqs_disease_warn_stage_pk; Type: CONSTRAINT; Schema: public; Owner: lqs
+--
+
+ALTER TABLE ONLY lqs_disease_warn_stage
+    ADD CONSTRAINT lqs_disease_warn_stage_pk PRIMARY KEY (seq);
+
+
+--
+-- Name: lqs_driver_info lqs_driver_info_pk; Type: CONSTRAINT; Schema: public; Owner: lqs
+--
+
+ALTER TABLE ONLY lqs_driver_info
+    ADD CONSTRAINT lqs_driver_info_pk PRIMARY KEY (driver_seq);
+
+
+--
 -- Name: lqs_farm_access_vehicle lqs_farm_access_vehicle_pk; Type: CONSTRAINT; Schema: public; Owner: lqs
 --
 
 ALTER TABLE ONLY lqs_farm_access_vehicle
-    ADD CONSTRAINT lqs_farm_access_vehicle_pk PRIMARY KEY (car_no, farm_seq, cap_dt);
+    ADD CONSTRAINT lqs_farm_access_vehicle_pk PRIMARY KEY (seq);
+
+
+--
+-- Name: lqs_farm_disease lqs_farm_disease_pk; Type: CONSTRAINT; Schema: public; Owner: lqs
+--
+
+ALTER TABLE ONLY lqs_farm_disease
+    ADD CONSTRAINT lqs_farm_disease_pk PRIMARY KEY (seq);
+
+
+--
+-- Name: lqs_farm_info lqs_farm_info_pk; Type: CONSTRAINT; Schema: public; Owner: lqs
+--
+
+ALTER TABLE ONLY lqs_farm_info
+    ADD CONSTRAINT lqs_farm_info_pk PRIMARY KEY (farm_seq);
 
 
 --
@@ -2926,6 +3449,14 @@ ALTER TABLE ONLY lqs_lpr_info
 
 ALTER TABLE ONLY lqs_lpr_status
     ADD CONSTRAINT lqs_lpr_status_pk PRIMARY KEY (lpr_seq, cre_dt);
+
+
+--
+-- Name: lqs_meta_disease lqs_meta_disease_pk; Type: CONSTRAINT; Schema: public; Owner: lqs
+--
+
+ALTER TABLE ONLY lqs_meta_disease
+    ADD CONSTRAINT lqs_meta_disease_pk PRIMARY KEY (disease_code);
 
 
 --
